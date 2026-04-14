@@ -6,58 +6,56 @@
 <title>Amigos Grill — Portola Valley, CA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
 
   body {
     font-family: 'Libre Franklin', sans-serif;
     color: #1a1208;
     background: #faf7f0;
+    overflow-x: hidden;
   }
 
-  .ag-hero {
-    background: #1c1005;
-    color: #faf7f0;
-    position: relative;
-    overflow: hidden;
-    min-height: 420px;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
+  /* ── Back to portfolio ── */
+  .ag-back {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(0,0,0,0.5);
+    color: #f5c97a;
+    text-decoration: none;
+    font-size: 11px;
+    padding: 8px 16px;
+    border-radius: 2px;
+    font-family: 'Libre Franklin', sans-serif;
+    letter-spacing: 0.08em;
+    z-index: 200;
+    backdrop-filter: blur(12px);
+    transition: background 0.2s;
+    border: 0.5px solid rgba(245,201,122,0.2);
   }
+  .ag-back:hover { background: rgba(0,0,0,0.7); }
 
-  .ag-hero-texture {
-    position: absolute;
-    inset: 0;
-    background:
-      repeating-linear-gradient(
-        45deg,
-        transparent,
-        transparent 40px,
-        rgba(180,120,20,0.04) 40px,
-        rgba(180,120,20,0.04) 41px
-      );
-  }
-
-  .ag-hero-accent {
-    position: absolute;
-    top: -60px;
-    right: -60px;
-    width: 320px;
-    height: 320px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(192,100,20,0.18) 0%, transparent 70%);
-  }
-
+  /* ── Sticky Nav ── */
   .ag-nav {
-    position: absolute;
+    position: fixed;
     top: 0; left: 0; right: 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px 32px;
-    border-bottom: 0.5px solid rgba(255,255,255,0.1);
+    padding: 18px 32px;
+    z-index: 100;
+    transition: background 0.35s, padding 0.35s, box-shadow 0.35s;
+  }
+
+  .ag-nav.scrolled {
+    background: rgba(28,16,5,0.95);
+    backdrop-filter: blur(16px);
+    padding: 12px 32px;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.3);
   }
 
   .ag-nav-logo {
@@ -81,30 +79,137 @@
     text-transform: uppercase;
     font-weight: 500;
     transition: color 0.2s;
+    position: relative;
   }
   .ag-nav-links a:hover { color: #f5c97a; }
+  .ag-nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0; right: 0;
+    height: 1px;
+    background: #f5c97a;
+    transform: scaleX(0);
+    transition: transform 0.25s;
+  }
+  .ag-nav-links a:hover::after { transform: scaleX(1); }
+
+  /* ── Hamburger ── */
+  .ag-hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 4px;
+    z-index: 101;
+  }
+  .ag-hamburger span {
+    width: 22px;
+    height: 2px;
+    background: #f5c97a;
+    transition: transform 0.3s, opacity 0.3s;
+    display: block;
+  }
+  .ag-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .ag-hamburger.open span:nth-child(2) { opacity: 0; }
+  .ag-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  /* ── Mobile nav overlay ── */
+  .ag-mobile-nav {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(28,16,5,0.97);
+    z-index: 99;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+  .ag-mobile-nav.open { opacity: 1; pointer-events: all; }
+  .ag-mobile-nav a {
+    color: #faf7f0;
+    text-decoration: none;
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    transition: color 0.2s;
+  }
+  .ag-mobile-nav a:hover { color: #f5c97a; }
+
+  /* ── Hero ── */
+  .ag-hero {
+    background: #1c1005;
+    color: #faf7f0;
+    position: relative;
+    overflow: hidden;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+
+  .ag-hero-texture {
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 40px,
+        rgba(180,120,20,0.04) 40px,
+        rgba(180,120,20,0.04) 41px
+      );
+    will-change: transform;
+  }
+
+  .ag-hero-accent {
+    position: absolute;
+    top: -120px;
+    right: -120px;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(196,90,26,0.2) 0%, transparent 70%);
+    will-change: transform;
+  }
+
+  .ag-hero-accent-2 {
+    position: absolute;
+    bottom: -80px;
+    left: -80px;
+    width: 350px;
+    height: 350px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(245,201,122,0.08) 0%, transparent 70%);
+  }
 
   .ag-hero-content {
-    padding: 80px 32px 48px;
+    padding: 120px 48px 72px;
     position: relative;
     z-index: 1;
+    max-width: 640px;
   }
 
   .ag-hero-eyebrow {
     font-size: 11px;
-    letter-spacing: 0.2em;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
     color: #f5c97a;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
     font-weight: 500;
   }
 
   .ag-hero-title {
     font-family: 'Playfair Display', serif;
-    font-size: clamp(36px, 6vw, 58px);
-    line-height: 1.08;
+    font-size: clamp(42px, 7vw, 68px);
+    line-height: 1.05;
     color: #faf7f0;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
     font-weight: 700;
   }
 
@@ -114,21 +219,21 @@
   }
 
   .ag-hero-sub {
-    font-size: 14px;
-    color: rgba(250,247,240,0.65);
+    font-size: 15px;
+    color: rgba(250,247,240,0.6);
     font-weight: 300;
-    max-width: 360px;
-    line-height: 1.7;
-    margin-bottom: 32px;
+    max-width: 400px;
+    line-height: 1.75;
+    margin-bottom: 36px;
   }
 
-  .ag-hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+  .ag-hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; }
 
   .ag-btn-primary {
     background: #c45a1a;
     color: #faf7f0;
     border: none;
-    padding: 12px 28px;
+    padding: 14px 32px;
     font-family: 'Libre Franklin', sans-serif;
     font-size: 13px;
     font-weight: 500;
@@ -136,17 +241,17 @@
     text-transform: uppercase;
     cursor: pointer;
     border-radius: 2px;
-    transition: opacity 0.2s;
+    transition: background 0.25s, transform 0.2s;
     text-decoration: none;
     display: inline-block;
   }
-  .ag-btn-primary:hover { opacity: 0.85; }
+  .ag-btn-primary:hover { background: #d4661f; transform: translateY(-1px); }
 
   .ag-btn-outline {
     background: transparent;
     color: rgba(250,247,240,0.8);
-    border: 0.5px solid rgba(250,247,240,0.35);
-    padding: 12px 28px;
+    border: 1px solid rgba(250,247,240,0.25);
+    padding: 14px 32px;
     font-family: 'Libre Franklin', sans-serif;
     font-size: 13px;
     font-weight: 400;
@@ -154,18 +259,44 @@
     text-transform: uppercase;
     cursor: pointer;
     border-radius: 2px;
-    transition: background 0.2s;
+    transition: background 0.25s, border-color 0.25s, transform 0.2s;
     text-decoration: none;
     display: inline-block;
   }
-  .ag-btn-outline:hover { background: rgba(255,255,255,0.05); }
+  .ag-btn-outline:hover { background: rgba(255,255,255,0.06); border-color: rgba(250,247,240,0.4); transform: translateY(-1px); }
 
+  .ag-hero-scroll {
+    position: absolute;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: rgba(250,247,240,0.3);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    animation: scrollBounce 2s infinite;
+  }
+  .ag-hero-scroll-line {
+    width: 1px;
+    height: 32px;
+    background: linear-gradient(to bottom, rgba(245,201,122,0.5), transparent);
+  }
+  @keyframes scrollBounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(6px); }
+  }
+
+  /* ── Info Strip ── */
   .ag-info-strip {
     background: #c45a1a;
     display: flex;
     justify-content: space-around;
-    padding: 14px 32px;
-    gap: 8px;
+    padding: 16px 32px;
+    gap: 12px;
     flex-wrap: wrap;
   }
 
@@ -187,8 +318,9 @@
     flex-shrink: 0;
   }
 
+  /* ── Sections ── */
   .ag-section {
-    padding: 56px 32px;
+    padding: 80px 48px;
   }
 
   .ag-section-label {
@@ -197,53 +329,77 @@
     text-transform: uppercase;
     color: #c45a1a;
     font-weight: 500;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
   }
 
   .ag-section-title {
     font-family: 'Playfair Display', serif;
-    font-size: 30px;
+    font-size: 34px;
     font-weight: 700;
     color: #1c1005;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     line-height: 1.2;
   }
 
   .ag-section-sub {
-    font-size: 14px;
+    font-size: 15px;
     color: #6b5c42;
     font-weight: 300;
-    line-height: 1.7;
-    max-width: 480px;
-    margin-bottom: 36px;
+    line-height: 1.75;
+    max-width: 500px;
+    margin-bottom: 40px;
   }
 
+  /* ── Menu Grid ── */
   .ag-menu-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 2px;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 3px;
   }
 
   .ag-menu-card {
     background: #1c1005;
     color: #faf7f0;
-    padding: 28px 24px;
+    padding: 32px 28px;
     position: relative;
     overflow: hidden;
+    transition: transform 0.35s, box-shadow 0.35s;
+    cursor: default;
+  }
+
+  .ag-menu-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(28,16,5,0.4);
+    z-index: 2;
   }
 
   .ag-menu-card:first-child { background: #c45a1a; }
+  .ag-menu-card:first-child:hover { box-shadow: 0 12px 40px rgba(196,90,26,0.4); }
+
+  .ag-menu-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0; right: 0;
+    height: 2px;
+    background: #f5c97a;
+    transform: scaleX(0);
+    transition: transform 0.35s;
+  }
+  .ag-menu-card:hover::after { transform: scaleX(1); }
 
   .ag-menu-card-num {
     font-family: 'Playfair Display', serif;
-    font-size: 48px;
-    color: rgba(255,255,255,0.08);
+    font-size: 52px;
+    color: rgba(255,255,255,0.06);
     font-weight: 700;
     position: absolute;
     top: 8px;
     right: 16px;
     line-height: 1;
+    transition: color 0.35s;
   }
+  .ag-menu-card:hover .ag-menu-card-num { color: rgba(255,255,255,0.12); }
 
   .ag-menu-card-tag {
     font-size: 10px;
@@ -251,32 +407,92 @@
     text-transform: uppercase;
     color: #f5c97a;
     font-weight: 500;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
   }
 
   .ag-menu-card-name {
     font-family: 'Playfair Display', serif;
-    font-size: 19px;
+    font-size: 20px;
     font-weight: 700;
     line-height: 1.25;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     color: #faf7f0;
   }
 
   .ag-menu-card-desc {
-    font-size: 12px;
-    color: rgba(250,247,240,0.6);
-    line-height: 1.65;
+    font-size: 13px;
+    color: rgba(250,247,240,0.55);
+    line-height: 1.7;
     font-weight: 300;
   }
 
+  /* ── Gallery ── */
+  .ag-gallery {
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: 220px 220px;
+    gap: 3px;
+  }
+
+  .ag-gallery-item {
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+  }
+
+  .ag-gallery-item:first-child {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
+
+  .ag-gallery-bg {
+    position: absolute;
+    inset: 0;
+    transition: transform 0.5s;
+  }
+  .ag-gallery-item:hover .ag-gallery-bg { transform: scale(1.05); }
+
+  .ag-gallery-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(28,16,5,0.7) 0%, rgba(28,16,5,0.1) 50%, transparent 100%);
+    display: flex;
+    align-items: flex-end;
+    padding: 24px;
+    transition: background 0.35s;
+  }
+  .ag-gallery-item:hover .ag-gallery-overlay {
+    background: linear-gradient(to top, rgba(28,16,5,0.8) 0%, rgba(28,16,5,0.2) 60%, transparent 100%);
+  }
+
+  .ag-gallery-caption {
+    color: #faf7f0;
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 700;
+    transform: translateY(4px);
+    transition: transform 0.35s;
+  }
+  .ag-gallery-item:hover .ag-gallery-caption { transform: translateY(0); }
+  .ag-gallery-caption small {
+    display: block;
+    font-family: 'Libre Franklin', sans-serif;
+    font-size: 11px;
+    font-weight: 300;
+    color: rgba(250,247,240,0.6);
+    margin-top: 4px;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── Cantina / Tequila ── */
   .ag-tequila {
     background: #1c1005;
     color: #faf7f0;
-    padding: 56px 32px;
+    padding: 80px 48px;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 48px;
+    gap: 64px;
     align-items: center;
   }
 
@@ -291,74 +507,148 @@
 
   .ag-tequila-title {
     font-family: 'Playfair Display', serif;
-    font-size: 28px;
+    font-size: 32px;
     font-weight: 700;
-    line-height: 1.2;
-    margin-bottom: 16px;
+    line-height: 1.15;
+    margin-bottom: 20px;
     color: #faf7f0;
   }
 
   .ag-tequila-body {
-    font-size: 14px;
-    color: rgba(250,247,240,0.6);
-    line-height: 1.75;
+    font-size: 15px;
+    color: rgba(250,247,240,0.55);
+    line-height: 1.8;
     font-weight: 300;
-    margin-bottom: 28px;
+    margin-bottom: 32px;
   }
 
-  .ag-tequila-visual { display: flex; flex-direction: column; gap: 12px; }
+  .ag-tequila-visual { display: flex; flex-direction: column; gap: 10px; }
 
   .ag-cocktail-row {
-    background: rgba(255,255,255,0.04);
-    border: 0.5px solid rgba(255,255,255,0.08);
-    padding: 16px 20px;
+    background: rgba(255,255,255,0.03);
+    border: 0.5px solid rgba(255,255,255,0.07);
+    padding: 18px 22px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     border-radius: 2px;
-    transition: background 0.2s;
+    transition: background 0.25s, border-color 0.25s, transform 0.25s;
   }
-  .ag-cocktail-row:hover { background: rgba(255,255,255,0.07); }
+  .ag-cocktail-row:hover {
+    background: rgba(255,255,255,0.06);
+    border-color: rgba(245,201,122,0.15);
+    transform: translateX(4px);
+  }
 
   .ag-cocktail-name {
     font-family: 'Playfair Display', serif;
-    font-size: 15px;
+    font-size: 16px;
     color: #faf7f0;
   }
 
   .ag-cocktail-note {
     font-size: 11px;
-    color: rgba(250,247,240,0.45);
+    color: rgba(250,247,240,0.4);
+    font-weight: 300;
+    margin-top: 3px;
+  }
+
+  .ag-cocktail-price {
+    font-size: 15px;
+    color: #f5c97a;
+    font-weight: 500;
+    font-family: 'Playfair Display', serif;
+  }
+
+  /* ── Testimonials ── */
+  .ag-testimonials {
+    background: #f3ece0;
+    padding: 80px 48px;
+    text-align: center;
+  }
+
+  .ag-testimonials .ag-section-label,
+  .ag-testimonials .ag-section-title {
+    text-align: center;
+  }
+
+  .ag-testimonials .ag-section-sub {
+    margin: 0 auto 48px;
+    text-align: center;
+  }
+
+  .ag-reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  .ag-review-card {
+    background: #faf7f0;
+    padding: 32px 28px;
+    border-radius: 2px;
+    text-align: left;
+    border: 0.5px solid rgba(28,16,5,0.06);
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  .ag-review-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(28,16,5,0.08);
+  }
+
+  .ag-review-stars {
+    color: #c45a1a;
+    font-size: 14px;
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+  }
+
+  .ag-review-text {
+    font-size: 14px;
+    color: #3d3020;
+    line-height: 1.75;
+    font-weight: 300;
+    font-style: italic;
+    margin-bottom: 20px;
+  }
+
+  .ag-review-author {
+    font-size: 12px;
+    font-weight: 500;
+    color: #1c1005;
+    letter-spacing: 0.04em;
+  }
+
+  .ag-review-source {
+    font-size: 11px;
+    color: #a08060;
     font-weight: 300;
     margin-top: 2px;
   }
 
-  .ag-cocktail-price {
-    font-size: 14px;
-    color: #f5c97a;
-    font-weight: 500;
-  }
-
+  /* ── Location ── */
   .ag-location {
     background: #faf7f0;
-    padding: 56px 32px;
+    padding: 80px 48px;
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 48px;
     align-items: start;
-    border-top: 0.5px solid rgba(28,16,5,0.1);
+    border-top: 0.5px solid rgba(28,16,5,0.08);
   }
 
   .ag-hours-table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;
+    margin-top: 24px;
   }
 
   .ag-hours-table td {
-    padding: 8px 0;
+    padding: 10px 0;
     font-size: 13px;
-    border-bottom: 0.5px solid rgba(28,16,5,0.08);
+    border-bottom: 0.5px solid rgba(28,16,5,0.06);
   }
 
   .ag-hours-table td:last-child {
@@ -367,67 +657,233 @@
     font-weight: 300;
   }
 
-  .ag-map-placeholder {
-    background: #e8e0d0;
+  .ag-map-wrapper {
     border-radius: 2px;
-    height: 200px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    gap: 8px;
-    color: #6b5c42;
-    font-size: 13px;
+    overflow: hidden;
+    height: 280px;
+    border: 0.5px solid rgba(28,16,5,0.08);
   }
 
-  .ag-map-icon {
-    width: 28px;
-    height: 28px;
+  .ag-map-wrapper iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    filter: saturate(0.8) contrast(1.05);
+  }
+
+  /* ── CTA Banner ── */
+  .ag-cta-banner {
     background: #c45a1a;
-    border-radius: 50% 50% 50% 0;
-    transform: rotate(-45deg);
+    padding: 64px 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
   }
 
+  .ag-cta-banner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 30px,
+      rgba(255,255,255,0.03) 30px,
+      rgba(255,255,255,0.03) 31px
+    );
+  }
+
+  .ag-cta-banner-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(26px, 4vw, 38px);
+    color: #faf7f0;
+    font-weight: 700;
+    margin-bottom: 12px;
+    position: relative;
+  }
+
+  .ag-cta-banner-sub {
+    font-size: 14px;
+    color: rgba(250,247,240,0.75);
+    font-weight: 300;
+    margin-bottom: 28px;
+    position: relative;
+  }
+
+  .ag-cta-btns {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    flex-wrap: wrap;
+    position: relative;
+  }
+
+  .ag-btn-white {
+    background: #faf7f0;
+    color: #c45a1a;
+    border: none;
+    padding: 14px 32px;
+    font-family: 'Libre Franklin', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: background 0.25s, transform 0.2s;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .ag-btn-white:hover { background: #fff; transform: translateY(-1px); }
+
+  .ag-btn-outline-white {
+    background: transparent;
+    color: #faf7f0;
+    border: 1px solid rgba(250,247,240,0.4);
+    padding: 14px 32px;
+    font-family: 'Libre Franklin', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: border-color 0.25s, background 0.25s, transform 0.2s;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .ag-btn-outline-white:hover { border-color: #faf7f0; background: rgba(255,255,255,0.08); transform: translateY(-1px); }
+
+  /* ── Footer ── */
   .ag-footer {
     background: #1c1005;
     color: rgba(250,247,240,0.45);
-    padding: 28px 32px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 11px;
-    flex-wrap: wrap;
-    gap: 8px;
+    padding: 56px 48px 32px;
+  }
+
+  .ag-footer-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr 1fr;
+    gap: 40px;
+    margin-bottom: 40px;
   }
 
   .ag-footer-logo {
     font-family: 'Playfair Display', serif;
     color: #f5c97a;
-    font-size: 15px;
+    font-size: 20px;
+    margin-bottom: 12px;
   }
 
-  .ag-back {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: rgba(0,0,0,0.4);
-    color: #f5c97a;
-    text-decoration: none;
+  .ag-footer-desc {
+    font-size: 13px;
+    line-height: 1.7;
+    font-weight: 300;
+    color: rgba(250,247,240,0.4);
+    max-width: 280px;
+  }
+
+  .ag-footer-heading {
     font-size: 11px;
-    padding: 6px 14px;
-    border-radius: 2px;
-    font-family: 'Libre Franklin', sans-serif;
-    letter-spacing: 0.08em;
-    z-index: 100;
-    backdrop-filter: blur(8px);
-    transition: background 0.2s;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #f5c97a;
+    font-weight: 500;
+    margin-bottom: 16px;
   }
-  .ag-back:hover { background: rgba(0,0,0,0.6); }
 
-  @media (max-width: 600px) {
-    .ag-tequila { grid-template-columns: 1fr; }
-    .ag-location { grid-template-columns: 1fr; }
+  .ag-footer-links {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .ag-footer-links a {
+    color: rgba(250,247,240,0.5);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 300;
+    transition: color 0.2s;
+  }
+  .ag-footer-links a:hover { color: #f5c97a; }
+
+  .ag-footer-bottom {
+    border-top: 0.5px solid rgba(250,247,240,0.08);
+    padding-top: 24px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* ── Scroll animations ── */
+  .ag-reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+  }
+  .ag-reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .ag-reveal-delay-1 { transition-delay: 0.1s; }
+  .ag-reveal-delay-2 { transition-delay: 0.2s; }
+  .ag-reveal-delay-3 { transition-delay: 0.3s; }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
     .ag-nav-links { display: none; }
+    .ag-hamburger { display: flex; }
+    .ag-mobile-nav { display: flex; }
+
+    .ag-hero-content { padding: 100px 24px 56px; }
+    .ag-section { padding: 56px 24px; }
+
+    .ag-gallery {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 200px 180px 180px;
+    }
+    .ag-gallery-item:first-child {
+      grid-column: span 2;
+      grid-row: span 1;
+    }
+
+    .ag-tequila {
+      grid-template-columns: 1fr;
+      padding: 56px 24px;
+      gap: 40px;
+    }
+
+    .ag-testimonials { padding: 56px 24px; }
+
+    .ag-location {
+      grid-template-columns: 1fr;
+      padding: 56px 24px;
+    }
+
+    .ag-cta-banner { padding: 48px 24px; }
+
+    .ag-footer { padding: 40px 24px 24px; }
+    .ag-footer-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .ag-gallery {
+      grid-template-columns: 1fr;
+      grid-template-rows: repeat(5, 180px);
+    }
+    .ag-gallery-item:first-child {
+      grid-column: span 1;
+    }
+
+    .ag-footer-grid { grid-template-columns: 1fr; }
+    .ag-reviews-grid { grid-template-columns: 1fr; }
+    .ag-menu-grid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -435,29 +891,51 @@
 
 <a href="index.html" class="ag-back">Back to portfolio</a>
 
-<div class="ag-hero">
-  <div class="ag-hero-texture"></div>
-  <div class="ag-hero-accent"></div>
-  <nav class="ag-nav">
-    <div class="ag-nav-logo">Amigos Grill</div>
-    <ul class="ag-nav-links">
-      <li><a href="#">Menu</a></li>
-      <li><a href="#">Cantina</a></li>
-      <li><a href="#">Catering</a></li>
-      <li><a href="#">Find Us</a></li>
-    </ul>
-  </nav>
-  <div class="ag-hero-content">
+<!-- Nav -->
+<nav class="ag-nav" id="mainNav">
+  <div class="ag-nav-logo">Amigos Grill</div>
+  <ul class="ag-nav-links">
+    <li><a href="#menu">Menu</a></li>
+    <li><a href="#gallery">Gallery</a></li>
+    <li><a href="#cantina">Cantina</a></li>
+    <li><a href="#reviews">Reviews</a></li>
+    <li><a href="#location">Find Us</a></li>
+  </ul>
+  <button class="ag-hamburger" id="hamburger" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- Mobile Nav -->
+<div class="ag-mobile-nav" id="mobileNav">
+  <a href="#menu">Menu</a>
+  <a href="#gallery">Gallery</a>
+  <a href="#cantina">Cantina</a>
+  <a href="#reviews">Reviews</a>
+  <a href="#location">Find Us</a>
+</div>
+
+<!-- Hero -->
+<div class="ag-hero" id="hero">
+  <div class="ag-hero-texture" id="heroTexture"></div>
+  <div class="ag-hero-accent" id="heroAccent"></div>
+  <div class="ag-hero-accent-2"></div>
+  <div class="ag-hero-content ag-reveal">
     <p class="ag-hero-eyebrow">Portola Valley, California &mdash; Est. 2006</p>
     <h1 class="ag-hero-title">Cocina Mexicana<br><em>y Cantina</em></h1>
     <p class="ag-hero-sub">Family-owned since 2006. Home of Don Pilar craft tequila. Fresh ingredients, outdoor patio, and margaritas worth the drive.</p>
     <div class="ag-hero-ctas">
       <a href="#menu" class="ag-btn-primary">View Full Menu</a>
-      <a href="#" class="ag-btn-outline">Order Takeout</a>
+      <a href="tel:6508513997" class="ag-btn-outline">Order Takeout</a>
     </div>
+  </div>
+  <div class="ag-hero-scroll">
+    <span>Scroll</span>
+    <div class="ag-hero-scroll-line"></div>
   </div>
 </div>
 
+<!-- Info Strip -->
 <div class="ag-info-strip">
   <div class="ag-info-item"><div class="ag-info-dot"></div> Open Daily 10am &ndash; 9:30pm</div>
   <div class="ag-info-item"><div class="ag-info-dot"></div> 3130 Alpine Rd, Portola Valley</div>
@@ -465,30 +943,33 @@
   <div class="ag-info-item"><div class="ag-info-dot"></div> (650) 851-3997</div>
 </div>
 
+<!-- Menu -->
 <div class="ag-section" id="menu" style="background: #faf7f0;">
-  <p class="ag-section-label">From the kitchen</p>
-  <h2 class="ag-section-title">What we're known for</h2>
-  <p class="ag-section-sub">Gourmet Mexican in the heart of Ladera Country Shopper. Everything made fresh, everything made with care.</p>
+  <div class="ag-reveal">
+    <p class="ag-section-label">From the kitchen</p>
+    <h2 class="ag-section-title">What we're known for</h2>
+    <p class="ag-section-sub">Gourmet Mexican in the heart of Ladera Country Shopper. Everything made fresh, everything made with care.</p>
+  </div>
   <div class="ag-menu-grid">
-    <div class="ag-menu-card">
+    <div class="ag-menu-card ag-reveal ag-reveal-delay-1">
       <span class="ag-menu-card-num">01</span>
       <p class="ag-menu-card-tag">Fan Favorite</p>
       <p class="ag-menu-card-name">Carne Asada Ribeye</p>
       <p class="ag-menu-card-desc">Jalisco-style skirt steak, black beans, avocado, roasted chiles &amp; corn tortillas.</p>
     </div>
-    <div class="ag-menu-card">
+    <div class="ag-menu-card ag-reveal ag-reveal-delay-2">
       <span class="ag-menu-card-num">02</span>
       <p class="ag-menu-card-tag">Signature</p>
       <p class="ag-menu-card-name">Tortilla Soup</p>
       <p class="ag-menu-card-desc">Rich tomato broth, queso fresco, crema, avocado, crispy tortilla strips.</p>
     </div>
-    <div class="ag-menu-card">
+    <div class="ag-menu-card ag-reveal ag-reveal-delay-2">
       <span class="ag-menu-card-num">03</span>
       <p class="ag-menu-card-tag">Classic</p>
       <p class="ag-menu-card-name">Gourmet Burrito</p>
       <p class="ag-menu-card-desc">Grilled chicken or carne asada, black beans, rice, guacamole &amp; salsa verde.</p>
     </div>
-    <div class="ag-menu-card">
+    <div class="ag-menu-card ag-reveal ag-reveal-delay-3">
       <span class="ag-menu-card-num">04</span>
       <p class="ag-menu-card-tag">From Jalisco</p>
       <p class="ag-menu-card-name">Carne en su Jugo</p>
@@ -497,14 +978,49 @@
   </div>
 </div>
 
-<div class="ag-tequila">
-  <div>
+<!-- Gallery -->
+<div class="ag-gallery" id="gallery">
+  <div class="ag-gallery-item ag-reveal">
+    <div class="ag-gallery-bg" style="background: linear-gradient(135deg, #c45a1a 0%, #8b3a0f 40%, #1c1005 100%);"></div>
+    <div class="ag-gallery-overlay">
+      <div class="ag-gallery-caption">Patio Dining<small>Sun-drenched outdoor seating</small></div>
+    </div>
+  </div>
+  <div class="ag-gallery-item ag-reveal ag-reveal-delay-1">
+    <div class="ag-gallery-bg" style="background: linear-gradient(135deg, #d4884a 0%, #a06030 60%, #3d2510 100%);"></div>
+    <div class="ag-gallery-overlay">
+      <div class="ag-gallery-caption">Fresh Guacamole<small>Made tableside</small></div>
+    </div>
+  </div>
+  <div class="ag-gallery-item ag-reveal ag-reveal-delay-2">
+    <div class="ag-gallery-bg" style="background: linear-gradient(135deg, #f5c97a 0%, #c45a1a 60%, #6b2808 100%);"></div>
+    <div class="ag-gallery-overlay">
+      <div class="ag-gallery-caption">Craft Margaritas<small>Don Pilar tequila</small></div>
+    </div>
+  </div>
+  <div class="ag-gallery-item ag-reveal ag-reveal-delay-1">
+    <div class="ag-gallery-bg" style="background: linear-gradient(135deg, #2d1a08 0%, #5c3018 40%, #c45a1a 100%);"></div>
+    <div class="ag-gallery-overlay">
+      <div class="ag-gallery-caption">Carne Asada<small>Jalisco-style ribeye</small></div>
+    </div>
+  </div>
+  <div class="ag-gallery-item ag-reveal ag-reveal-delay-2">
+    <div class="ag-gallery-bg" style="background: linear-gradient(135deg, #1c1005 0%, #4a2a12 50%, #c45a1a 100%);"></div>
+    <div class="ag-gallery-overlay">
+      <div class="ag-gallery-caption">The Cantina<small>Warm ambiance nightly</small></div>
+    </div>
+  </div>
+</div>
+
+<!-- Cantina -->
+<div class="ag-tequila" id="cantina">
+  <div class="ag-reveal">
     <p class="ag-tequila-label">The Cantina</p>
     <h2 class="ag-tequila-title">Home of<br>Don Pilar Tequila</h2>
     <p class="ag-tequila-body">Amigos Grill is the home base of Don Pilar &mdash; an award-winning craft tequila made without additives. Every margarita is mixed with the real thing.</p>
     <a href="#" class="ag-btn-primary">See Full Drink Menu</a>
   </div>
-  <div class="ag-tequila-visual">
+  <div class="ag-tequila-visual ag-reveal ag-reveal-delay-1">
     <div class="ag-cocktail-row">
       <div>
         <p class="ag-cocktail-name">Mango Margarita</p>
@@ -536,8 +1052,38 @@
   </div>
 </div>
 
-<div class="ag-location">
-  <div>
+<!-- Testimonials -->
+<div class="ag-testimonials" id="reviews">
+  <div class="ag-reveal">
+    <p class="ag-section-label">What people say</p>
+    <h2 class="ag-section-title">Loved by the Community</h2>
+    <p class="ag-section-sub">A neighborhood favorite since 2006.</p>
+  </div>
+  <div class="ag-reviews-grid">
+    <div class="ag-review-card ag-reveal ag-reveal-delay-1">
+      <div class="ag-review-stars">&starf;&starf;&starf;&starf;&starf;</div>
+      <p class="ag-review-text">"The carne asada is hands-down the best in the Bay Area. We drive 30 minutes just for the margaritas and patio vibes."</p>
+      <p class="ag-review-author">Sarah M.</p>
+      <p class="ag-review-source">Google Reviews</p>
+    </div>
+    <div class="ag-review-card ag-reveal ag-reveal-delay-2">
+      <div class="ag-review-stars">&starf;&starf;&starf;&starf;&starf;</div>
+      <p class="ag-review-text">"A hidden gem in Portola Valley. The tortilla soup is incredible, and Don Pilar tequila is dangerously smooth."</p>
+      <p class="ag-review-author">Mike R.</p>
+      <p class="ag-review-source">Yelp</p>
+    </div>
+    <div class="ag-review-card ag-reveal ag-reveal-delay-3">
+      <div class="ag-review-stars">&starf;&starf;&starf;&starf;&starf;</div>
+      <p class="ag-review-text">"Our family's go-to for years. The owners know everyone by name. You can taste the care in every dish."</p>
+      <p class="ag-review-author">Linda T.</p>
+      <p class="ag-review-source">Google Reviews</p>
+    </div>
+  </div>
+</div>
+
+<!-- Location -->
+<div class="ag-location" id="location">
+  <div class="ag-reveal">
     <p class="ag-section-label">Find us</p>
     <h2 class="ag-section-title">Visit the Patio</h2>
     <p style="font-size: 14px; color: #6b5c42; line-height: 1.7; font-weight: 300; margin-bottom: 20px;">We're at the Ladera Country Shopper on Alpine Road &mdash; right off 280. Dog-friendly patio, no reservations needed.</p>
@@ -548,20 +1094,116 @@
       <tr><td style="font-weight: 500; font-size: 13px;">Parking</td><td>Free lot, Ladera Shopper</td></tr>
     </table>
   </div>
-  <div>
-    <div class="ag-map-placeholder">
-      <div class="ag-map-icon"></div>
-      <span>3130 Alpine Rd, Portola Valley</span>
+  <div class="ag-reveal ag-reveal-delay-1">
+    <div class="ag-map-wrapper">
+      <iframe src="https://maps.google.com/maps?q=Amigos+Grill+3130+Alpine+Rd+Portola+Valley+CA&t=&z=15&ie=UTF8&iwloc=&output=embed" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
     </div>
-    <p style="font-size: 11px; color: #a08060; margin-top: 10px; font-weight: 300;">Catering available for events &middot; Call to inquire</p>
+    <p style="font-size: 11px; color: #a08060; margin-top: 12px; font-weight: 300;">Catering available for events &middot; Call to inquire</p>
   </div>
 </div>
 
-<div class="ag-footer">
-  <span class="ag-footer-logo">Amigos Grill</span>
-  <span>3130 Alpine Rd, Suite 280, Portola Valley CA &middot; (650) 851-3997</span>
-  <span>Instagram &middot; Facebook &middot; Yelp</span>
+<!-- CTA Banner -->
+<div class="ag-cta-banner">
+  <h2 class="ag-cta-banner-title ag-reveal">Ready for Real Mexican?</h2>
+  <p class="ag-cta-banner-sub ag-reveal ag-reveal-delay-1">Walk in anytime or call ahead for takeout &amp; catering.</p>
+  <div class="ag-cta-btns ag-reveal ag-reveal-delay-2">
+    <a href="tel:6508513997" class="ag-btn-white">Call to Order</a>
+    <a href="#location" class="ag-btn-outline-white">Get Directions</a>
+  </div>
 </div>
+
+<!-- Footer -->
+<div class="ag-footer">
+  <div class="ag-footer-grid">
+    <div>
+      <div class="ag-footer-logo">Amigos Grill</div>
+      <p class="ag-footer-desc">Family-owned Mexican restaurant and cantina in Portola Valley. Home of Don Pilar craft tequila.</p>
+    </div>
+    <div>
+      <p class="ag-footer-heading">Navigate</p>
+      <ul class="ag-footer-links">
+        <li><a href="#menu">Menu</a></li>
+        <li><a href="#cantina">Cantina</a></li>
+        <li><a href="#gallery">Gallery</a></li>
+        <li><a href="#reviews">Reviews</a></li>
+        <li><a href="#location">Find Us</a></li>
+      </ul>
+    </div>
+    <div>
+      <p class="ag-footer-heading">Contact</p>
+      <ul class="ag-footer-links">
+        <li><a href="tel:6508513997">(650) 851-3997</a></li>
+        <li><a href="#">amigos@email.com</a></li>
+        <li><a href="#">Catering Inquiry</a></li>
+      </ul>
+    </div>
+    <div>
+      <p class="ag-footer-heading">Social</p>
+      <ul class="ag-footer-links">
+        <li><a href="#">Instagram</a></li>
+        <li><a href="#">Facebook</a></li>
+        <li><a href="#">Yelp</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="ag-footer-bottom">
+    <span>&copy; 2024 Amigos Grill. All rights reserved.</span>
+    <span>3130 Alpine Rd, Suite 280, Portola Valley CA</span>
+  </div>
+</div>
+
+<script>
+  // Sticky nav on scroll
+  const nav = document.getElementById('mainNav');
+  const hero = document.getElementById('hero');
+
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 60);
+  }, { passive: true });
+
+  // Hamburger toggle
+  const hamburger = document.getElementById('hamburger');
+  const mobileNav = document.getElementById('mobileNav');
+
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('open');
+    mobileNav.classList.toggle('open');
+    document.body.style.overflow = mobileNav.classList.contains('open') ? 'hidden' : '';
+  });
+
+  mobileNav.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      hamburger.classList.remove('open');
+      mobileNav.classList.remove('open');
+      document.body.style.overflow = '';
+    });
+  });
+
+  // Parallax on hero elements
+  const heroTexture = document.getElementById('heroTexture');
+  const heroAccent = document.getElementById('heroAccent');
+
+  window.addEventListener('scroll', () => {
+    const y = window.scrollY;
+    if (y < window.innerHeight) {
+      heroTexture.style.transform = `translateY(${y * 0.3}px)`;
+      heroAccent.style.transform = `translateY(${y * 0.15}px)`;
+    }
+  }, { passive: true });
+
+  // Scroll reveal animations
+  const revealEls = document.querySelectorAll('.ag-reveal');
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+  revealEls.forEach(el => revealObserver.observe(el));
+</script>
 
 </body>
 </html>

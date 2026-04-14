@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Avi Buxbaum — Web Design · Ladera, CA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #ffffff;
+    --bg2: #f5f5f3;
+    --text: #111110;
+    --text2: #555551;
+    --text3: #999994;
+    --border: rgba(0,0,0,0.1);
+    --border2: rgba(0,0,0,0.18);
+    --info-border: #378ADD;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #111110;
+      --bg2: #1c1c1a;
+      --text: #f0efea;
+      --text2: #a8a8a0;
+      --text3: #666660;
+      --border: rgba(255,255,255,0.1);
+      --border2: rgba(255,255,255,0.18);
+    }
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    font-size: 16px;
+  }
+
+  /* NAV */
+  nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    border-bottom: 0.5px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 100;
+  }
+  .nav-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 17px;
+    color: var(--text);
+    text-decoration: none;
+  }
+  .nav-links {
+    display: flex;
+    gap: 28px;
+    list-style: none;
+  }
+  .nav-links a {
+    font-size: 13px;
+    color: var(--text2);
+    text-decoration: none;
+    letter-spacing: 0.04em;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta {
+    background: var(--text);
+    color: var(--bg);
+    border: none;
+    padding: 9px 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    border-radius: 2px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: opacity 0.2s;
+  }
+  .nav-cta:hover { opacity: 0.8; }
+
+  /* HERO */
+  .hero {
+    padding: 80px 40px 72px;
+    border-bottom: 0.5px solid var(--border);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 40px;
+    align-items: end;
+  }
+  .hero-eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 16px;
+    font-weight: 400;
+  }
+  .hero-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(38px, 5vw, 56px);
+    line-height: 1.05;
+    color: var(--text);
+    margin-bottom: 24px;
+  }
+  .hero-title em {
+    font-style: italic;
+    color: var(--text2);
+  }
+  .hero-body {
+    font-size: 15px;
+    color: var(--text2);
+    line-height: 1.8;
+    max-width: 420px;
+    font-weight: 300;
+    margin-bottom: 32px;
+  }
+  .hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+  .btn-primary {
+    background: var(--text);
+    color: var(--bg);
+    border: none;
+    padding: 13px 28px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    border-radius: 2px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: opacity 0.2s;
+    display: inline-block;
+  }
+  .btn-primary:hover { opacity: 0.8; }
+  .btn-ghost {
+    background: transparent;
+    color: var(--text2);
+    border: 0.5px solid var(--border2);
+    padding: 13px 28px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    border-radius: 2px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s;
+    display: inline-block;
+  }
+  .btn-ghost:hover { background: var(--bg2); }
+  .hero-badge {
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px 28px;
+    text-align: center;
+    min-width: 148px;
+    align-self: flex-start;
+    margin-top: 8px;
+  }
+  .hero-badge-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 38px;
+    color: var(--text);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .hero-badge-label {
+    font-size: 11px;
+    color: var(--text3);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* SECTIONS */
+  section {
+    padding: 64px 40px;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .section-label {
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 8px;
+  }
+  .section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    color: var(--text);
+    margin-bottom: 36px;
+  }
+
+  /* WORK GRID */
+  .work-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .work-card {
+    background: var(--bg);
+    padding: 28px 24px;
+    transition: background 0.2s;
+  }
+  .work-card:hover { background: var(--bg2); }
+  .work-card-featured { border-left: 2px solid var(--info-border); }
+  .work-tag {
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 12px;
+  }
+  .work-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 19px;
+    color: var(--text);
+    margin-bottom: 8px;
+    line-height: 1.25;
+  }
+  .work-desc {
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.65;
+    font-weight: 300;
+    margin-bottom: 16px;
+  }
+  .pill {
+    display: inline-block;
+    background: var(--bg2);
+    color: var(--text2);
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 0.5px solid var(--border);
+    margin-right: 4px;
+    margin-bottom: 4px;
+  }
+
+  /* SERVICES */
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+  }
+  .service-card {
+    background: var(--bg2);
+    border-radius: var(--radius-md);
+    padding: 24px 20px;
+  }
+  .service-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    color: var(--text3);
+    margin-bottom: 10px;
+    line-height: 1;
+  }
+  .service-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .service-price {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .service-desc {
+    font-size: 12px;
+    color: var(--text3);
+    line-height: 1.6;
+  }
+
+  /* ABOUT */
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 56px;
+    align-items: center;
+  }
+  .about-body {
+    font-size: 15px;
+    color: var(--text2);
+    line-height: 1.8;
+    font-weight: 300;
+  }
+  .about-body p + p { margin-top: 16px; }
+  .facts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .fact {
+    background: var(--bg2);
+    border-radius: var(--radius-md);
+    padding: 18px;
+  }
+  .fact-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 24px;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .fact-label {
+    font-size: 11px;
+    color: var(--text3);
+    letter-spacing: 0.08em;
+  }
+
+  /* CTA */
+  .cta-section {
+    padding: 72px 40px;
+    text-align: center;
+    background: var(--bg2);
+    border-bottom: none;
+  }
+  .cta-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 34px;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+  .cta-sub {
+    font-size: 15px;
+    color: var(--text2);
+    margin-bottom: 32px;
+    font-weight: 300;
+  }
+
+  /* FOOTER */
+  footer {
+    padding: 24px 40px;
+    border-top: 0.5px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: var(--text3);
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 640px) {
+    nav { padding: 16px 20px; }
+    .nav-links { display: none; }
+    .hero { grid-template-columns: 1fr; padding: 48px 20px 40px; }
+    .hero-badge { display: none; }
+    section { padding: 48px 20px; }
+    .about-grid { grid-template-columns: 1fr; gap: 32px; }
+    .cta-section { padding: 56px 20px; }
+    footer { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#" class="nav-name">Avi Buxbaum</a>
+  <ul class="nav-links">
+    <li><a href="#work">Work</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a href="mailto:avibuxbaum@gmail.com" class="nav-cta">Get in touch</a>
+</nav>
+
+<div class="hero">
+  <div>
+    <p class="hero-eyebrow">Web design · Portola Valley, CA</p>
+    <h1 class="hero-title">Beautiful websites<br>for <em>local businesses</em></h1>
+    <p class="hero-body">I build fast, modern websites for small businesses in the Ladera, Menlo Park, and Portola Valley area. Affordable, personal, and done right.</p>
+    <div class="hero-ctas">
+      <a href="mailto:avibuxbaum@gmail.com" class="btn-primary">Get a free mockup</a>
+      <a href="#work" class="btn-ghost">See my work</a>
+    </div>
+  </div>
+  <div class="hero-badge">
+    <div class="hero-badge-num">$500</div>
+    <div class="hero-badge-label">starting from</div>
+  </div>
+</div>
+
+<section id="work">
+  <p class="section-label">Recent work</p>
+  <h2 class="section-title">Sites I've built</h2>
+  <div class="work-grid">
+    <div class="work-card work-card-featured">
+      <p class="work-tag">Restaurant · Portola Valley</p>
+      <p class="work-name">Amigos Grill</p>
+      <p class="work-desc">Full redesign for a beloved local Mexican restaurant — menu, cantina section, hours, and contact info.</p>
+      <span class="pill">Menu pages</span>
+      <span class="pill">Mobile-first</span>
+      <span class="pill">Fast load</span>
+    </div>
+    <div class="work-card">
+      <p class="work-tag">Your business · Ladera area</p>
+      <p class="work-name">Your business here</p>
+      <p class="work-desc">I'm actively looking for local businesses to partner with. First few clients get a discounted rate.</p>
+      <span class="pill">Spot available</span>
+    </div>
+    <div class="work-card">
+      <p class="work-tag">Your business · Menlo Park</p>
+      <p class="work-name">Your business here</p>
+      <p class="work-desc">Restaurant, shop, service business — if you're local and need a website, let's talk.</p>
+      <span class="pill">Spot available</span>
+    </div>
+  </div>
+</section>
+
+<section id="services">
+  <p class="section-label">What I offer</p>
+  <h2 class="section-title">Simple, honest pricing</h2>
+  <div class="services-grid">
+    <div class="service-card">
+      <div class="service-num">01</div>
+      <p class="service-title">Starter site</p>
+      <p class="service-price">$500</p>
+      <p class="service-desc">1–3 pages. Hours, menu or services, contact info, mobile-ready. Done in 1 week.</p>
+    </div>
+    <div class="service-card">
+      <div class="service-num">02</div>
+      <p class="service-title">Full site</p>
+      <p class="service-price">$900</p>
+      <p class="service-desc">5+ pages, photo gallery, online menu or booking, Google Maps, social links.</p>
+    </div>
+    <div class="service-card">
+      <div class="service-num">03</div>
+      <p class="service-title">Refresh</p>
+      <p class="service-price">$300</p>
+      <p class="service-desc">Already have a site? I'll modernize it — new design, faster load, mobile-friendly.</p>
+    </div>
+    <div class="service-card">
+      <div class="service-num">04</div>
+      <p class="service-title">Monthly care</p>
+      <p class="service-price">$75/mo</p>
+      <p class="service-desc">Updates, edits, backups. I keep your site fresh so you don't have to think about it.</p>
+    </div>
+  </div>
+</section>
+
+<section id="about">
+  <p class="section-label">About</p>
+  <div class="about-grid">
+    <div class="about-body">
+      <p>I'm Avi — a web designer based right here in Ladera. I build websites for small local businesses that want to look great online without paying agency prices.</p>
+      <p>I use modern tools to build sites fast, which means lower costs for you and a quicker turnaround. Most projects are done in under two weeks.</p>
+      <p>I know this community — I live here. When I build your site, I'm building something for my neighbors.</p>
+    </div>
+    <div class="facts-grid">
+      <div class="fact">
+        <div class="fact-num">2 wks</div>
+        <div class="fact-label">avg turnaround</div>
+      </div>
+      <div class="fact">
+        <div class="fact-num">Local</div>
+        <div class="fact-label">Ladera based</div>
+      </div>
+      <div class="fact">
+        <div class="fact-num">100%</div>
+        <div class="fact-label">mobile-ready</div>
+      </div>
+      <div class="fact">
+        <div class="fact-num">No</div>
+        <div class="fact-label">hidden fees</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="cta-section" id="contact">
+  <h2 class="cta-title">Ready to get started?</h2>
+  <p class="cta-sub">I'll build you a free mockup before you commit to anything.</p>
+  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+    <a href="mailto:avibuxbaum@gmail.com" class="btn-primary">Email Avi</a>
+    <a href="tel:+16502796241" class="btn-ghost">Call or text</a>
+  </div>
+</div>
+
+<footer>
+  <span>Avi Buxbaum · Web Design · Ladera, CA</span>
+  <span>avibuxbaum@gmail.com</span>
+</footer>
+
+</body>
+</html>

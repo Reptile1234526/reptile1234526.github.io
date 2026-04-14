@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amigos Grill — Portola Valley, CA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Libre Franklin', sans-serif;
+    color: #1a1208;
+    background: #faf7f0;
+  }
+
+  .ag-hero {
+    background: #1c1005;
+    color: #faf7f0;
+    position: relative;
+    overflow: hidden;
+    min-height: 420px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+
+  .ag-hero-texture {
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 40px,
+        rgba(180,120,20,0.04) 40px,
+        rgba(180,120,20,0.04) 41px
+      );
+  }
+
+  .ag-hero-accent {
+    position: absolute;
+    top: -60px;
+    right: -60px;
+    width: 320px;
+    height: 320px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(192,100,20,0.18) 0%, transparent 70%);
+  }
+
+  .ag-nav {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 32px;
+    border-bottom: 0.5px solid rgba(255,255,255,0.1);
+  }
+
+  .ag-nav-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    color: #f5c97a;
+    letter-spacing: 0.04em;
+  }
+
+  .ag-nav-links {
+    display: flex;
+    gap: 28px;
+    list-style: none;
+  }
+
+  .ag-nav-links a {
+    color: rgba(255,255,255,0.7);
+    text-decoration: none;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+  .ag-nav-links a:hover { color: #f5c97a; }
+
+  .ag-hero-content {
+    padding: 80px 32px 48px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .ag-hero-eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #f5c97a;
+    margin-bottom: 16px;
+    font-weight: 500;
+  }
+
+  .ag-hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(36px, 6vw, 58px);
+    line-height: 1.08;
+    color: #faf7f0;
+    margin-bottom: 20px;
+    font-weight: 700;
+  }
+
+  .ag-hero-title em {
+    font-style: italic;
+    color: #f5c97a;
+  }
+
+  .ag-hero-sub {
+    font-size: 14px;
+    color: rgba(250,247,240,0.65);
+    font-weight: 300;
+    max-width: 360px;
+    line-height: 1.7;
+    margin-bottom: 32px;
+  }
+
+  .ag-hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+
+  .ag-btn-primary {
+    background: #c45a1a;
+    color: #faf7f0;
+    border: none;
+    padding: 12px 28px;
+    font-family: 'Libre Franklin', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: opacity 0.2s;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .ag-btn-primary:hover { opacity: 0.85; }
+
+  .ag-btn-outline {
+    background: transparent;
+    color: rgba(250,247,240,0.8);
+    border: 0.5px solid rgba(250,247,240,0.35);
+    padding: 12px 28px;
+    font-family: 'Libre Franklin', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: background 0.2s;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .ag-btn-outline:hover { background: rgba(255,255,255,0.05); }
+
+  .ag-info-strip {
+    background: #c45a1a;
+    display: flex;
+    justify-content: space-around;
+    padding: 14px 32px;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .ag-info-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(250,247,240,0.92);
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+  }
+
+  .ag-info-dot {
+    width: 4px;
+    height: 4px;
+    background: #f5c97a;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .ag-section {
+    padding: 56px 32px;
+  }
+
+  .ag-section-label {
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #c45a1a;
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+
+  .ag-section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 30px;
+    font-weight: 700;
+    color: #1c1005;
+    margin-bottom: 8px;
+    line-height: 1.2;
+  }
+
+  .ag-section-sub {
+    font-size: 14px;
+    color: #6b5c42;
+    font-weight: 300;
+    line-height: 1.7;
+    max-width: 480px;
+    margin-bottom: 36px;
+  }
+
+  .ag-menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 2px;
+  }
+
+  .ag-menu-card {
+    background: #1c1005;
+    color: #faf7f0;
+    padding: 28px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ag-menu-card:first-child { background: #c45a1a; }
+
+  .ag-menu-card-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 48px;
+    color: rgba(255,255,255,0.08);
+    font-weight: 700;
+    position: absolute;
+    top: 8px;
+    right: 16px;
+    line-height: 1;
+  }
+
+  .ag-menu-card-tag {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #f5c97a;
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+
+  .ag-menu-card-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 1.25;
+    margin-bottom: 8px;
+    color: #faf7f0;
+  }
+
+  .ag-menu-card-desc {
+    font-size: 12px;
+    color: rgba(250,247,240,0.6);
+    line-height: 1.65;
+    font-weight: 300;
+  }
+
+  .ag-tequila {
+    background: #1c1005;
+    color: #faf7f0;
+    padding: 56px 32px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: center;
+  }
+
+  .ag-tequila-label {
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #f5c97a;
+    font-weight: 500;
+    margin-bottom: 12px;
+  }
+
+  .ag-tequila-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 16px;
+    color: #faf7f0;
+  }
+
+  .ag-tequila-body {
+    font-size: 14px;
+    color: rgba(250,247,240,0.6);
+    line-height: 1.75;
+    font-weight: 300;
+    margin-bottom: 28px;
+  }
+
+  .ag-tequila-visual { display: flex; flex-direction: column; gap: 12px; }
+
+  .ag-cocktail-row {
+    background: rgba(255,255,255,0.04);
+    border: 0.5px solid rgba(255,255,255,0.08);
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 2px;
+    transition: background 0.2s;
+  }
+  .ag-cocktail-row:hover { background: rgba(255,255,255,0.07); }
+
+  .ag-cocktail-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    color: #faf7f0;
+  }
+
+  .ag-cocktail-note {
+    font-size: 11px;
+    color: rgba(250,247,240,0.45);
+    font-weight: 300;
+    margin-top: 2px;
+  }
+
+  .ag-cocktail-price {
+    font-size: 14px;
+    color: #f5c97a;
+    font-weight: 500;
+  }
+
+  .ag-location {
+    background: #faf7f0;
+    padding: 56px 32px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: start;
+    border-top: 0.5px solid rgba(28,16,5,0.1);
+  }
+
+  .ag-hours-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+
+  .ag-hours-table td {
+    padding: 8px 0;
+    font-size: 13px;
+    border-bottom: 0.5px solid rgba(28,16,5,0.08);
+  }
+
+  .ag-hours-table td:last-child {
+    text-align: right;
+    color: #6b5c42;
+    font-weight: 300;
+  }
+
+  .ag-map-placeholder {
+    background: #e8e0d0;
+    border-radius: 2px;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 8px;
+    color: #6b5c42;
+    font-size: 13px;
+  }
+
+  .ag-map-icon {
+    width: 28px;
+    height: 28px;
+    background: #c45a1a;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+  }
+
+  .ag-footer {
+    background: #1c1005;
+    color: rgba(250,247,240,0.45);
+    padding: 28px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .ag-footer-logo {
+    font-family: 'Playfair Display', serif;
+    color: #f5c97a;
+    font-size: 15px;
+  }
+
+  .ag-back {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(0,0,0,0.4);
+    color: #f5c97a;
+    text-decoration: none;
+    font-size: 11px;
+    padding: 6px 14px;
+    border-radius: 2px;
+    font-family: 'Libre Franklin', sans-serif;
+    letter-spacing: 0.08em;
+    z-index: 100;
+    backdrop-filter: blur(8px);
+    transition: background 0.2s;
+  }
+  .ag-back:hover { background: rgba(0,0,0,0.6); }
+
+  @media (max-width: 600px) {
+    .ag-tequila { grid-template-columns: 1fr; }
+    .ag-location { grid-template-columns: 1fr; }
+    .ag-nav-links { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<a href="index.html" class="ag-back">Back to portfolio</a>
+
+<div class="ag-hero">
+  <div class="ag-hero-texture"></div>
+  <div class="ag-hero-accent"></div>
+  <nav class="ag-nav">
+    <div class="ag-nav-logo">Amigos Grill</div>
+    <ul class="ag-nav-links">
+      <li><a href="#">Menu</a></li>
+      <li><a href="#">Cantina</a></li>
+      <li><a href="#">Catering</a></li>
+      <li><a href="#">Find Us</a></li>
+    </ul>
+  </nav>
+  <div class="ag-hero-content">
+    <p class="ag-hero-eyebrow">Portola Valley, California &mdash; Est. 2006</p>
+    <h1 class="ag-hero-title">Cocina Mexicana<br><em>y Cantina</em></h1>
+    <p class="ag-hero-sub">Family-owned since 2006. Home of Don Pilar craft tequila. Fresh ingredients, outdoor patio, and margaritas worth the drive.</p>
+    <div class="ag-hero-ctas">
+      <a href="#menu" class="ag-btn-primary">View Full Menu</a>
+      <a href="#" class="ag-btn-outline">Order Takeout</a>
+    </div>
+  </div>
+</div>
+
+<div class="ag-info-strip">
+  <div class="ag-info-item"><div class="ag-info-dot"></div> Open Daily 10am &ndash; 9:30pm</div>
+  <div class="ag-info-item"><div class="ag-info-dot"></div> 3130 Alpine Rd, Portola Valley</div>
+  <div class="ag-info-item"><div class="ag-info-dot"></div> Dine-in &middot; Takeout &middot; Catering</div>
+  <div class="ag-info-item"><div class="ag-info-dot"></div> (650) 851-3997</div>
+</div>
+
+<div class="ag-section" id="menu" style="background: #faf7f0;">
+  <p class="ag-section-label">From the kitchen</p>
+  <h2 class="ag-section-title">What we're known for</h2>
+  <p class="ag-section-sub">Gourmet Mexican in the heart of Ladera Country Shopper. Everything made fresh, everything made with care.</p>
+  <div class="ag-menu-grid">
+    <div class="ag-menu-card">
+      <span class="ag-menu-card-num">01</span>
+      <p class="ag-menu-card-tag">Fan Favorite</p>
+      <p class="ag-menu-card-name">Carne Asada Ribeye</p>
+      <p class="ag-menu-card-desc">Jalisco-style skirt steak, black beans, avocado, roasted chiles &amp; corn tortillas.</p>
+    </div>
+    <div class="ag-menu-card">
+      <span class="ag-menu-card-num">02</span>
+      <p class="ag-menu-card-tag">Signature</p>
+      <p class="ag-menu-card-name">Tortilla Soup</p>
+      <p class="ag-menu-card-desc">Rich tomato broth, queso fresco, crema, avocado, crispy tortilla strips.</p>
+    </div>
+    <div class="ag-menu-card">
+      <span class="ag-menu-card-num">03</span>
+      <p class="ag-menu-card-tag">Classic</p>
+      <p class="ag-menu-card-name">Gourmet Burrito</p>
+      <p class="ag-menu-card-desc">Grilled chicken or carne asada, black beans, rice, guacamole &amp; salsa verde.</p>
+    </div>
+    <div class="ag-menu-card">
+      <span class="ag-menu-card-num">04</span>
+      <p class="ag-menu-card-tag">From Jalisco</p>
+      <p class="ag-menu-card-name">Carne en su Jugo</p>
+      <p class="ag-menu-card-desc">Slow-braised beef in rich broth, bacon, cilantro, onions, lime &amp; corn tortillas.</p>
+    </div>
+  </div>
+</div>
+
+<div class="ag-tequila">
+  <div>
+    <p class="ag-tequila-label">The Cantina</p>
+    <h2 class="ag-tequila-title">Home of<br>Don Pilar Tequila</h2>
+    <p class="ag-tequila-body">Amigos Grill is the home base of Don Pilar &mdash; an award-winning craft tequila made without additives. Every margarita is mixed with the real thing.</p>
+    <a href="#" class="ag-btn-primary">See Full Drink Menu</a>
+  </div>
+  <div class="ag-tequila-visual">
+    <div class="ag-cocktail-row">
+      <div>
+        <p class="ag-cocktail-name">Mango Margarita</p>
+        <p class="ag-cocktail-note">Don Pilar blanco &middot; fresh mango &middot; lime</p>
+      </div>
+      <p class="ag-cocktail-price">$14</p>
+    </div>
+    <div class="ag-cocktail-row">
+      <div>
+        <p class="ag-cocktail-name">La Paloma Rica</p>
+        <p class="ag-cocktail-note">Don Pilar reposado &middot; grapefruit &middot; salt</p>
+      </div>
+      <p class="ag-cocktail-price">$15</p>
+    </div>
+    <div class="ag-cocktail-row">
+      <div>
+        <p class="ag-cocktail-name">Classic Margarita</p>
+        <p class="ag-cocktail-note">Don Pilar &middot; triple sec &middot; fresh lime</p>
+      </div>
+      <p class="ag-cocktail-price">$13</p>
+    </div>
+    <div class="ag-cocktail-row">
+      <div>
+        <p class="ag-cocktail-name">Tequila Flight</p>
+        <p class="ag-cocktail-note">3 pours of Don Pilar expressions</p>
+      </div>
+      <p class="ag-cocktail-price">$22</p>
+    </div>
+  </div>
+</div>
+
+<div class="ag-location">
+  <div>
+    <p class="ag-section-label">Find us</p>
+    <h2 class="ag-section-title">Visit the Patio</h2>
+    <p style="font-size: 14px; color: #6b5c42; line-height: 1.7; font-weight: 300; margin-bottom: 20px;">We're at the Ladera Country Shopper on Alpine Road &mdash; right off 280. Dog-friendly patio, no reservations needed.</p>
+    <table class="ag-hours-table">
+      <tr><td style="font-weight: 500; font-size: 13px;">Monday &ndash; Sunday</td><td>10:00 am &ndash; 9:30 pm</td></tr>
+      <tr><td style="font-weight: 500; font-size: 13px;">Address</td><td>3130 Alpine Rd, Suite 280</td></tr>
+      <tr><td style="font-weight: 500; font-size: 13px;">Phone</td><td>(650) 851-3997</td></tr>
+      <tr><td style="font-weight: 500; font-size: 13px;">Parking</td><td>Free lot, Ladera Shopper</td></tr>
+    </table>
+  </div>
+  <div>
+    <div class="ag-map-placeholder">
+      <div class="ag-map-icon"></div>
+      <span>3130 Alpine Rd, Portola Valley</span>
+    </div>
+    <p style="font-size: 11px; color: #a08060; margin-top: 10px; font-weight: 300;">Catering available for events &middot; Call to inquire</p>
+  </div>
+</div>
+
+<div class="ag-footer">
+  <span class="ag-footer-logo">Amigos Grill</span>
+  <span>3130 Alpine Rd, Suite 280, Portola Valley CA &middot; (650) 851-3997</span>
+  <span>Instagram &middot; Facebook &middot; Yelp</span>
+</div>
+
+</body>
+</html>

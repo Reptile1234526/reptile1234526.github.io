@@ -76,22 +76,15 @@
   .menu-nav a:hover { color: var(--gold); }
 
   .menu-back {
-    position: fixed;
-    top: 16px;
-    right: 16px;
-    background: rgba(26,16,32,0.6);
     color: var(--gold);
     text-decoration: none;
     font-size: 11px;
-    padding: 8px 16px;
-    border-radius: 100px;
-    font-family: 'IBM Plex Mono', monospace;
-    z-index: 200;
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(212,168,67,0.2);
-    transition: background 0.2s;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 500;
+    transition: color 0.2s;
   }
-  .menu-back:hover { background: rgba(26,16,32,0.85); }
+  .menu-back:hover { color: var(--gold-light); }
 
   /* Sections */
   .menu-section {
@@ -261,14 +254,13 @@
 </head>
 <body>
 
-<a href="amigos.html" class="menu-back">&larr; back</a>
-
 <div class="menu-header">
   <img src="amigos-logo.png" alt="Amigos Grill">
 </div>
 <div class="menu-address">3130 Alpine Rd, Suite 290 · Portola Valley, CA · 650.851.3997</div>
 
 <nav class="menu-nav">
+  <a href="amigos.html" class="menu-back">&larr; Back</a>
   <a href="#appetizers">Appetizers</a>
   <a href="#soups">Soups</a>
   <a href="#salads">Salads</a>

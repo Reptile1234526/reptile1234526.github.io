@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Menu — Amigos Grill</title>
+<link rel="icon" type="image/png" href="amigos-favicon.png">
+<link rel="apple-touch-icon" href="amigos-favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=Rye&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pink: #E91E90;
+    --purple: #6B5B95;
+    --purple-light: #8677a9;
+    --gold: #D4A843;
+    --gold-light: #f0cc6a;
+    --dark: #1a1020;
+    --dark2: #241830;
+    --light: #f5e6c8;
+    --light2: #e8d4a8;
+    --muted-dark: #807070;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    color: var(--dark);
+    background: var(--light);
+  }
+
+  /* Header */
+  .menu-header {
+    background: var(--pink);
+    text-align: center;
+    padding: 24px 40px 20px;
+  }
+  .menu-header img {
+    height: 60px;
+    width: auto;
+  }
+
+  .menu-address {
+    background: var(--purple);
+    text-align: center;
+    padding: 10px 40px;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(250,248,245,0.85);
+  }
+
+  .menu-nav {
+    background: var(--dark);
+    padding: 14px 40px;
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .menu-nav a {
+    color: rgba(250,248,245,0.6);
+    text-decoration: none;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+  .menu-nav a:hover { color: var(--gold); }
+
+  .menu-back {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    background: rgba(26,16,32,0.6);
+    color: var(--gold);
+    text-decoration: none;
+    font-size: 11px;
+    padding: 8px 16px;
+    border-radius: 100px;
+    font-family: 'IBM Plex Mono', monospace;
+    z-index: 200;
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(212,168,67,0.2);
+    transition: background 0.2s;
+  }
+  .menu-back:hover { background: rgba(26,16,32,0.85); }
+
+  /* Sections */
+  .menu-section {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 56px 32px 32px;
+  }
+
+  .menu-section-header {
+    margin-bottom: 32px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid var(--pink);
+  }
+
+  .menu-section-title {
+    font-family: 'Source Serif 4', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--dark);
+  }
+
+  .menu-section-subtitle {
+    font-size: 13px;
+    color: var(--muted-dark);
+    font-weight: 300;
+    margin-top: 2px;
+    font-style: italic;
+  }
+
+  /* Items */
+  .menu-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 16px 0;
+    border-bottom: 1px solid rgba(26,16,32,0.06);
+    gap: 16px;
+  }
+
+  .menu-item-info { flex: 1; }
+
+  .menu-item-name {
+    font-family: 'Source Serif 4', serif;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 4px;
+  }
+
+  .menu-item-desc {
+    font-size: 13px;
+    color: var(--muted-dark);
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  .menu-item-price {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--pink);
+    white-space: nowrap;
+    padding-top: 2px;
+  }
+
+  .menu-item-note {
+    font-size: 12px;
+    color: var(--purple);
+    font-style: italic;
+    margin-top: 4px;
+  }
+
+  /* Combo/special boxes */
+  .menu-box {
+    background: var(--dark);
+    color: var(--light);
+    padding: 28px;
+    border-radius: 4px;
+    margin: 16px 0;
+  }
+  .menu-box .menu-item { border-color: rgba(250,248,245,0.08); }
+  .menu-box .menu-item-name { color: var(--light); }
+  .menu-box .menu-item-desc { color: rgba(250,248,245,0.5); }
+  .menu-box .menu-item-price { color: var(--gold); }
+  .menu-box-title {
+    font-family: 'Source Serif 4', serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--gold);
+    margin-bottom: 4px;
+  }
+  .menu-box-sub {
+    font-size: 12px;
+    color: rgba(250,248,245,0.45);
+    font-weight: 300;
+    margin-bottom: 12px;
+  }
+
+  /* Drinks grid */
+  .drinks-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    margin-top: 16px;
+  }
+  .drink-card {
+    background: var(--dark);
+    padding: 20px;
+    border-radius: 4px;
+  }
+  .drink-card-name {
+    font-family: 'Source Serif 4', serif;
+    font-size: 15px;
+    color: var(--light);
+    margin-bottom: 4px;
+  }
+  .drink-card-desc {
+    font-size: 12px;
+    color: rgba(250,248,245,0.4);
+    line-height: 1.5;
+    font-weight: 300;
+  }
+  .drink-card-price {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    color: var(--gold);
+    margin-top: 8px;
+  }
+
+  /* Footer */
+  .menu-footer {
+    background: var(--dark);
+    color: rgba(250,248,245,0.4);
+    text-align: center;
+    padding: 32px;
+    font-size: 11px;
+    margin-top: 40px;
+    border-top: 3px solid var(--pink);
+  }
+  .menu-footer-logo {
+    font-family: 'Rye', serif;
+    color: var(--gold);
+    font-size: 18px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+  .menu-footer p { margin-top: 4px; line-height: 1.6; }
+  .menu-footer-warn {
+    font-size: 9px;
+    color: rgba(250,248,245,0.25);
+    margin-top: 16px;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 600px) {
+    .menu-section { padding: 40px 20px 24px; }
+    .drinks-grid { grid-template-columns: 1fr; }
+    .menu-nav { gap: 12px; padding: 12px 20px; }
+    .menu-nav a { font-size: 10px; }
+    .menu-header { padding: 16px 20px; }
+    .menu-header img { height: 44px; }
+  }
+</style>
+</head>
+<body>
+
+<a href="amigos.html" class="menu-back">&larr; back</a>
+
+<div class="menu-header">
+  <img src="amigos-logo.png" alt="Amigos Grill">
+</div>
+<div class="menu-address">3130 Alpine Rd, Suite 290 · Portola Valley, CA · 650.851.3997</div>
+
+<nav class="menu-nav">
+  <a href="#appetizers">Appetizers</a>
+  <a href="#soups">Soups</a>
+  <a href="#salads">Salads</a>
+  <a href="#quesadillas">Quesadillas</a>
+  <a href="#burritos">Burritos</a>
+  <a href="#tacos">Tacos</a>
+  <a href="#plates">Large Plates</a>
+  <a href="#combos">Combos</a>
+  <a href="#breakfast">Breakfast</a>
+  <a href="#drinks">Drinks</a>
+  <a href="#catering">Catering</a>
+</nav>
+
+<!-- Appetizers -->
+<div class="menu-section" id="appetizers">
+  <div class="menu-section-header">
+    <h2 class="menu-section-title">Antojitos</h2>
+    <p class="menu-section-subtitle">Appetizers</p>
+  </div>
+  <div class="menu-item">
+    <div class="menu-item-info">
+      <p class="menu-item-name">Guacamole con Chips</p>
+    </div>
+    <span class="menu-item-price">$13.75</span>
+  </div>
+  <div class="menu-item">
+    <div class="menu-item-info">
+      <p class="menu-item-name">Bandera Nachos</p>
+      <p class="menu-item-desc">Chips with melted monterey jack cheese, guacamole, refried beans, crema &amp; salsa.</p>
+      <p class="menu-item-note">Add meat +$2.50</p>
+    </div>
+    <span class="menu-item-price">$14.95</span>
+  </div>
+  <div class="menu-item">
+    <div class="menu-item-info">
+      <p class="menu-item-name">Queso Fundido</p>
+      <p class="menu-item-desc">Skillet of melted cheese. Served with tortillas.</p>
+      <p class="menu-item-note">Add chorizo +$2</p>
+    </div>
+    <span class="menu-item-price">$13.95</span>
+  </div>
+  <div class="menu-item">
+    <div class="menu-item-info">
+      <p class="menu-item-name">Ceviche Coste&ntilde;o</p>
+      <p class="menu-item-desc">Red snapper &amp; shrimp cooked in lime juice and onions. Served with salsa mexicana, avocado &amp; chips.</p>
+    </div>
+    <span class="menu-item-price">$16.25</span>
+  </div>
+  <div class="menu-item">
+    <div class="menu-item-info">
+      <p class="menu-item-name">Sopesitos</p>
+      <p class="menu-item-desc">Three fried corn masa boats filled with meat, refried beans, guacamole, crema, salsa &amp; queso fresco.</p>
+    </div>
+    <span class="menu-item-price">$14.95</span>
+  </div>
+  <div class="menu-item">
+    <div class="menu-item-info">
+      <p class="menu-item-name">Tamales</p>
+      <p class="menu-item-desc">Two chicken or pork tamales, mild tomato salsa, crema &amp; queso fresco.</p>
+    </div>
+    <span class="menu-item-price">$13.45</span>
+  </div>
+</div>
+
+<!-- Soups -->
+<div class="menu-section" id="soups">
+  <div class="menu-section-header">
+    <h2 class="menu-section-title">Sopas</h2>
+    <p class="menu-section-subtitle">Soups</p>
+  </div>
+  <div class="menu-item">
+    <div class="menu-item-info">
+      <p class="menu-item-name">Sopa de Tortilla</p>
+      <p class="menu-item-desc">Tomato-chile broth with queso fresco, crema, avocado, pasilla strips &amp; tortilla strips.</p>
+      <p class="menu-item-note">Add chicken +$1.95</p>
+    </div>
+    <span class="menu-item-price">$11.50</span>
+  </div>
+  <div class="menu-item">
+    <div class="menu-item-info">
+      <p class="menu-item-name">Coctel de Camar&oacute;n</p>
+      <p class="menu-item-desc">Shrimp cocktail served in a broth with onions, avocado, cucumber, tomatoes, cilantro &amp; salsa.</p>
+    </div>
+    <span class="menu-item-price">$19.50</span>
+  </div>
+</div>
+
+<!-- Salads -->
+<div class="menu-section" id="salads">
+  <div class="menu-section-header">
+    <h2 class="menu-section-title">Ensaladas</h2>
+    <p class="menu-section-subtitle">Salads</p>
+  </div>
+  <div class="menu-item">
+    <div class="menu-item-info">
+      <p class="menu-item-name">Amigo Salad</p>
+      <p class="menu-item-desc">Romaine lettuce, tomatoes, jicama &amp; queso fresco. Served with cilantro-jalape&ntilde;o dressing.</p>
+    </div>
+    <span class="menu-item-price">$12.50</span>
+  </div>
+  <div class="menu-item">
+    <div class="menu-item-info">
+      <p class="menu-item-name">Fajita Salad</p>
+      <p class="menu-item-desc">Crispy tortilla bowl with beef, chicken or shrimp fajitas, black beans, melted cheese, lettuce, tomato, red bell pepper, red onions &amp; cilantro-jalape&ntilde;o dressing.</p>
+      <p class="menu-item-note">Add shrimp fajitas +$2</p>
+    </div>
+    <span class="menu-item-price">$18.95</span>
+  </div>
+  <div class="menu-item">
+    <div class="menu-item-info">
+      <p class="menu-item-name">Pollo Asado Caesar Salad</p>
+      <p class="menu-item-desc">Romaine lettuce, queso fresco, tortilla strips, chicken breast &amp; cilantro-guacamole caesar dressing.</p>
+    </div>
+    <span class="menu-item-price">$18.50</span>
+  </div>
+  <div class="menu-item">
+    <div class="menu-item-info">
+      <p class="menu-item-name">Ceviche Salad</p>
+      <p class="menu-item-desc">Romaine lettuce, cucumber, avocado, tomatoes, shrimp, red snapper cooked in lime juice, onions &amp; cilantro-jalape&ntilde;o dressing.</p>
+    </div>
+    <span class="menu-item-price">$19.50</span>
+  </div>
+</div>
+
+<!-- Quesadillas -->
+<div class="menu-section" id="quesadillas">
+  <div class="menu-section-header">
+    <h2 class="menu-section-title">Quesadillas</h2>
+  </div>
+  <div class="menu-item">
+    <div class="menu-item-info">
+      <p class="menu-item-name">Amigo Quesadilla</p>
+      <p class="menu-item-desc">Guacamole, crema &amp; salsa.</p>
+      <p class="menu-item-note">Add meat +$2.95</p>
+    </div>
+    <span class="menu-item-price">$12.95</span>
+  </div>
+  <div class="menu-item">
+    <div class="menu-item-info">
+      <p class="menu-item-name">Quesadilla de Vegetales</p>
+      <p class="menu-item-desc">Spinach, corn &amp; zucchini on a spinach tortilla. Topped with salsa.</p>
+    </div>
+    <span class="menu-item-price">$12.75</span>
+  </div>
+  <div class="menu-item">
+    <div class="menu-item-info">
+      <p class="menu-item-name">Quesadilla con Camarones</p>
+      <p class="menu-item-desc">Shrimp, grilled corn, onions &amp; mushrooms on a tomato tortilla. Topped with salsa mexicana.</p>
+    </div>
+    <span class="menu-item-price">$18.95</span>
+  </div>
+  <div class="menu-item">
+    <div class="menu-item-info">
+      <p class="menu-item-name">Fajita Quesadilla</p>
+      <p class="menu-item-desc">Beef, chicken or shrimp fajitas with guacamole, crema &amp; salsa mexicana.</p>
+    </div>
+    <span class="menu-item-price">$18.95</span>
+  </div>
+</div>
+
+<!-- Burritos -->
+<div class="menu-section" id="burritos">
+  <div class="menu-section-header">
+    <h2 class="menu-section-title">Burritos</h2>
+  </div>
+  <div class="menu-item">
+    <div class="menu-item-info">
+      <p class="menu-item-name">Amigo Burrito</p>
+      <p class="menu-item-desc">Meat, rice, pinto beans, guacamole, cheese, sour cream &amp; salsa.</p>
+      <p class="menu-item-note">Add $2 for wet burrito with salsa verde, sour cream &amp; melted cheese</p>
+    </div>
+    <span class="menu-item-price">$16.95</span>
+  </div>
+  <div class="menu-item">
+    <div class="menu-item-info">
+      <p class="menu-item-name">Burrito Rojo</p>
+      <p class="menu-item-desc">Grilled chicken, black beans, rice, guacamole &amp; salsa. Topped with melted cheese, sour cream &amp; red mole sauce on a tomato tortilla.</p>
+    </div>
+    <span class="menu-item-price">$17.45</span>
+  </div>
+  <div class="menu-item">
+    <div class="menu-item-info">
+      <p class="menu-item-name">Burrito del Mar</p>
+      <p class="menu-item-desc">Shrimp, red bell pepper, grilled corn, onions, refried beans &amp; rice. Topped with melted cheese &amp; salsa verde on a tomato tortilla.</p>
+    </div>
+    <span class="menu-item-price">$18.95</span>
+  </div>
+  <div class="menu-item">
+    <div class="menu-item-info">
+      <p class="menu-item-name">Burrito Vegetariano</p>
+      <p class="menu-item-desc">Rice, beans, guacamole, cheese, sour cream, zucchini, tomatoes, spinach, corn, onions &amp; salsa mexicana on a spinach tortilla.</p>
+    </div>
+    <span class="menu-item-price">$15.25</span>
+  </div>
+  <div class="menu-item">
+    <div class="menu-item-info">
+      <p class="menu-item-name">Baby Burrito</p>
+      <p class="menu-item-desc">Rice, refried beans &amp; cheese.</p>
+    </div>
+    <span class="menu-item-price">$10.95</span>
+  </div>
+</div>
+
+<!-- Tacos -->
+<div class="menu-section" id="tacos">
+  <div class="menu-section-header">
+    <h2 class="menu-section-title">Tacos</h2>
+  </div>
+  <div class="menu-item">
+    <div class="menu-item-info">
+      <p class="menu-item-name">Amigo Taco</p>
+      <p class="menu-item-desc">Meat, cilantro, onions &amp; salsa roja.</p>
+      <p class="menu-item-note">Add cheese +50&cent;</p>
+    </div>
+    <span class="menu-item-price">$3.95</span>
+  </div>
+  <div class="menu-item">
+    <div class="menu-item-info">
+      <p class="menu-item-name">Amigo Taco Especial</p>
+      <p class="menu-item-desc">Same as above, with cheese, guacamole &amp; crema mexicana.</p>
+    </div>
+    <span class="menu-item-price">$5.95</span>
+  </div>
+  <div class="menu-item">
+    <div class="menu-item-info">
+      <p class="menu-item-name">Tacos de Plaza</p>
+      <p class="menu-item-desc">Two Amigo tacos with a side of rice, refried beans, guacamole &amp; roasted chiles.</p>
+    </div>
+    <span class="menu-item-price">$16.95</span>
+  </div>
+  <div class="menu-item">
+    <div class="menu-item-info">
+      <p class="menu-item-name">Taco de Pescado</p>
+      <p class="menu-item-desc">Two tacos with grilled red snapper served with lettuce, onions, cilantro, jalape&ntilde;o dressing &amp; melted cheese. Served over cilantro rice.</p>
+    </div>
+    <span class="menu-item-price">$15.45</span>
+  </div>
+  <div class="menu-item">
+    <div class="menu-item-info">
+      <p class="menu-item-name">Taquitos</p>
+      <p class="menu-item-desc">Three fried tacos with chicken &amp; mashed potato, topped with crema, queso fresco, guacamole, lettuce &amp; mild tomato salsa.</p>
+    </div>
+    <span class="menu-item-price">$13.45</span>
+  </div>
+</div>
+
+<!-- Large Plates -->
+<div class="menu-section" id="plates">
+  <div class="menu-section-header">
+    <h2 class="menu-section-title">Platos Fuertes</h2>
+    <p class="menu-section-subtitle">Large Plates</p>
+  </div>
+  <div class="menu-item">
+    <div class="menu-item-info">
+      <p class="menu-item-name">Platillo de Carne Asada</p>
+      <p class="menu-item-desc">Ribeye steak, rice, black beans, guacamole, salsa mexicana, scallions &amp; tortillas.</p>
+    </div>
+    <span class="menu-item-price">$25.95</span>
+  </div>
+  <div class="menu-item">
+    <div class="menu-item-info">
+      <p class="menu-item-name">Carnitas Michoacanas</p>
+      <p class="menu-item-desc">Braised pork carnitas, refried beans, mexican rice, guacamole, salsa, roasted chile &amp; tortillas.</p>
+    </div>
+    <span class="menu-item-price">$21.95</span>
+  </div>
+  <div class="menu-item">
+    <div class="menu-item-info">
+      <p class="menu-item-name">Fajitas</p>
+      <p class="menu-item-desc">Sizzling fajitas of beef, chicken or shrimp, saut&eacute;ed with vegetables. Served with rice, beans, guacamole &amp; tortillas.</p>
+      <p class="menu-item-note">Add shrimp +$2</p>
+    </div>
+    <span class="menu-item-price">$21.95</span>
+  </div>
+  <div class="menu-item">
+    <div class="menu-item-info">
+      <p class="menu-item-name">Enchiladas</p>
+      <p class="menu-item-desc">Three chicken enchiladas with red, green or chocolate mole sauce. Served with green rice &amp; black beans.</p>
+      <p class="menu-item-note">Add chocolate mole +$2.50</p>
+    </div>
+    <span class="menu-item-price">$17.95</span>
+  </div>
+  <div class="menu-item">
+    <div class="menu-item-info">
+      <p class="menu-item-name">Carne en su Jugo</p>
+      <p class="menu-item-desc">Jalisco-style slow cooked beef in a rich broth with bacon, cilantro, onions, lime, radishes &amp; tortillas.</p>
+    </div>
+    <span class="menu-item-price">$18.95</span>
+  </div>
+  <div class="menu-item">
+    <div class="menu-item-info">
+      <p class="menu-item-name">Chile Relleno</p>
+      <p class="menu-item-desc">Two chiles rellenos in a mild red sauce with rice, beans &amp; tortillas.</p>
+    </div>
+    <span class="menu-item-price">$19.95</span>
+  </div>
+  <div class="menu-item">
+    <div class="menu-item-info">
+      <p class="menu-item-name">Pollo Marinado</p>
+      <p class="menu-item-desc">Grilled chicken breast in an adobo marinade with rice, beans, saut&eacute;ed vegetables &amp; tortillas.</p>
+    </div>
+    <span class="menu-item-price">$19.95</span>
+  </div>
+</div>
+
+<!-- Combos -->
+<div class="menu-section" id="combos">
+  <div class="menu-section-header">
+    <h2 class="menu-section-title">Combinados</h2>
+    <p class="menu-section-subtitle">Combination Plates — served with rice &amp; refried beans</p>
+  </div>
+  <p style="font-size:14px; color:var(--muted-dark); font-weight:300; line-height:1.7; margin-bottom:16px;">Choose from: enchilada, soft-shelled taco, hard-shelled taco, taquito, or tamal.</p>
+  <div class="menu-item">
+    <div class="menu-item-info"><p class="menu-item-name">One Item</p></div>
+    <span class="menu-item-price">$12.95</span>
+  </div>
+  <div class="menu-item">
+    <div class="menu-item-info"><p class="menu-item-name">Two Items</p></div>
+    <span class="menu-item-price">$15.95</span>
+  </div>
+  <div class="menu-item">
+    <div class="menu-item-info"><p class="menu-item-name">Three Items</p></div>
+    <span class="menu-item-price">$17.95</span>
+  </div>
+
+  <div style="margin-top:32px;">
+    <div class="menu-section-header">
+      <h2 class="menu-section-title">Kids Menu</h2>
+      <p class="menu-section-subtitle">15 years old or younger — served with rice, beans &amp; a scoop of ice cream</p>
+    </div>
+    <p style="font-size:14px; color:var(--muted-dark); font-weight:300; line-height:1.7; margin-bottom:16px;">Choose from: cheese quesadilla, chicken taquito, or enchilada.</p>
+    <div class="menu-item">
+      <div class="menu-item-info"><p class="menu-item-name">Kids Plate</p></div>
+      <span class="menu-item-price">$10.50</span>
+    </div>
+  </div>
+
+  <div style="margin-top:32px;">
+    <div class="menu-section-header" style="border-bottom-color: var(--gold);">
+      <h2 class="menu-section-title">Desserts</h2>
+    </div>
+    <div class="menu-item">
+      <div class="menu-item-info">
+        <p class="menu-item-name">Flan</p>
+        <p class="menu-item-desc">Custard dessert topped with caramel.</p>
+      </div>
+      <span class="menu-item-price">$5.75</span>
+    </div>
+  </div>
+</div>
+
+<!-- Breakfast -->
+<div class="menu-section" id="breakfast">
+  <div class="menu-section-header">
+    <h2 class="menu-section-title">Desayuno</h2>
+    <p class="menu-section-subtitle">Breakfast</p>
+  </div>
+  <div class="menu-item">
+    <div class="menu-item-info">
+      <p class="menu-item-name">Huevos Rancheros</p>
+      <p class="menu-item-desc">Two fried eggs served over corn tortillas with refried beans, smothered with salsa verde and queso fresco. Served with mexican rice.</p>
+    </div>
+    <span class="menu-item-price">$15.95</span>
+  </div>
+  <div class="menu-item">
+    <div class="menu-item-info">
+      <p class="menu-item-name">Chilaquiles Jalisco</p>
+      <p class="menu-item-desc">Crispy corn tortilla chips saut&eacute;ed in a roasted tomato sauce, topped with queso fresco, avocado &amp; onions. Served with refried beans &amp; mexican rice.</p>
+      <p class="menu-item-note">Add two fried eggs +$3</p>
+    </div>
+    <span class="menu-item-price">$15.95</span>
+  </div>
+  <div class="menu-item">
+    <div class="menu-item-info">
+      <p class="menu-item-name">Huevos con Chorizo</p>
+      <p class="menu-item-desc">Two scrambled eggs with chorizo, refried beans, mexican rice &amp; roasted jalape&ntilde;o.</p>
+    </div>
+    <span class="menu-item-price">$15.95</span>
+  </div>
+  <div class="menu-item">
+    <div class="menu-item-info">
+      <p class="menu-item-name">Breakfast Burrito</p>
+      <p class="menu-item-desc">Two scrambled eggs with mexican salsa, black beans, cilantro rice, avocado &amp; sour cream, wrapped in a spinach tortilla.</p>
+    </div>
+    <span class="menu-item-price">$14.95</span>
+  </div>
+  <div class="menu-item">
+    <div class="menu-item-info">
+      <p class="menu-item-name">Huevos a la Mexicana</p>
+      <p class="menu-item-desc">Two scrambled eggs saut&eacute;ed with pico de gallo salsa. Served with rice, refried beans &amp; roasted jalape&ntilde;o.</p>
+    </div>
+    <span class="menu-item-price">$14.95</span>
+  </div>
+  <div class="menu-item">
+    <div class="menu-item-info">
+      <p class="menu-item-name">Omelette Mexicano</p>
+      <p class="menu-item-desc">Omelette with cheese, bell pepper, onions, mushrooms, mild salsa, tortillas and your choice of ham or chorizo.</p>
+    </div>
+    <span class="menu-item-price">$17.95</span>
+  </div>
+</div>
+
+<!-- Drinks -->
+<div class="menu-section" id="drinks">
+  <div class="menu-section-header">
+    <h2 class="menu-section-title">Margaritas &amp; Tequila</h2>
+  </div>
+  <div class="drinks-grid">
+    <div class="drink-card">
+      <p class="drink-card-name">Aut&eacute;ntica Margarita</p>
+      <p class="drink-card-desc">Tequila, agave nectar, lime juice</p>
+      <p class="drink-card-price">$14 / pitcher $45</p>
+    </div>
+    <div class="drink-card">
+      <p class="drink-card-name">Amigos Margarita</p>
+      <p class="drink-card-desc">Tequila, sweet-n-sour, agave nectar, lime juice</p>
+      <p class="drink-card-price">$14 / pitcher $45</p>
+    </div>
+    <div class="drink-card">
+      <p class="drink-card-name">Flavored Margarita</p>
+      <p class="drink-card-desc">Mango, Blood Orange, Strawberry, Guava, Prickly Pear</p>
+      <p class="drink-card-price">$14 / pitcher $45</p>
+    </div>
+    <div class="drink-card">
+      <p class="drink-card-name">Jalape&ntilde;o Margarita</p>
+      <p class="drink-card-desc">Jalape&ntilde;o-infused blanco tequila</p>
+      <p class="drink-card-price">$14 / pitcher $56</p>
+    </div>
+    <div class="drink-card">
+      <p class="drink-card-name">Paloma</p>
+      <p class="drink-card-desc">Tequila, Squirt, lime juice</p>
+      <p class="drink-card-price">$14 / pitcher $56</p>
+    </div>
+    <div class="drink-card">
+      <p class="drink-card-name">Mexican Mule</p>
+      <p class="drink-card-desc">Tequila, ginger beer, lime juice, agave nectar</p>
+      <p class="drink-card-price">$14.50 / pitcher $58</p>
+    </div>
+    <div class="drink-card">
+      <p class="drink-card-name">La Cazuela</p>
+      <p class="drink-card-desc">Tequila, citrus juices and fruit, agave nectar, Squirt. Terracotta bowl for 2-3.</p>
+      <p class="drink-card-price">$25</p>
+    </div>
+    <div class="drink-card">
+      <p class="drink-card-name">Tequila Don Pilar</p>
+      <p class="drink-card-desc">Blanco $11 · Reposado $13 · A&ntilde;ejo $15 · Extra-A&ntilde;ejo $30</p>
+      <p class="drink-card-price">from $11</p>
+    </div>
+  </div>
+
+  <div style="margin-top:32px;">
+    <div class="menu-section-header">
+      <h2 class="menu-section-title">Beverages &amp; Beer</h2>
+    </div>
+    <div class="menu-item">
+      <div class="menu-item-info">
+        <p class="menu-item-name">Aguas Frescas</p>
+        <p class="menu-item-desc">20 oz.</p>
+      </div>
+      <span class="menu-item-price">$4.50</span>
+    </div>
+    <div class="menu-item">
+      <div class="menu-item-info">
+        <p class="menu-item-name">Sodas</p>
+      </div>
+      <span class="menu-item-price">$4.50</span>
+    </div>
+    <div class="menu-item">
+      <div class="menu-item-info">
+        <p class="menu-item-name">Beer</p>
+        <p class="menu-item-desc">Draft: XX Lager, XX Amber, Stella Artois, Deschutes. Bottled: Corona, Pac&iacute;fico, Modelo, Victoria, Bohemia &amp; more.</p>
+      </div>
+      <span class="menu-item-price">$9 – $11</span>
+    </div>
+    <div class="menu-item">
+      <div class="menu-item-info">
+        <p class="menu-item-name">Michelada</p>
+        <p class="menu-item-desc">Beer, lime juice, worcestershire, salt, tomato juice, chile sauce.</p>
+      </div>
+      <span class="menu-item-price">$14</span>
+    </div>
+    <div class="menu-item">
+      <div class="menu-item-info">
+        <p class="menu-item-name">Wine</p>
+        <p class="menu-item-desc">Reds: Poppy Pinot Noir, Trefethen Merlot, William Hill &amp; J. Lohr Cabernet. Whites: Trefethen Chardonnay, Dry Creek Sauvignon Blanc. Ros&eacute;: Rabble.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Catering -->
+<div class="menu-section" id="catering">
+  <div class="menu-section-header">
+    <h2 class="menu-section-title">To-Go Packages</h2>
+    <p class="menu-section-subtitle">Catering</p>
+  </div>
+  <div class="menu-box">
+    <p class="menu-box-title">Kids Pi&ntilde;ata Package</p>
+    <p class="menu-box-sub">Serves 20 kids</p>
+    <div class="menu-item">
+      <div class="menu-item-info">
+        <p class="menu-item-desc">20 chicken taquitos &amp; 20 cheese enchiladas served with rice, refried beans, chips &amp; salsa.</p>
+      </div>
+      <span class="menu-item-price">$235</span>
+    </div>
+  </div>
+  <div class="menu-box">
+    <p class="menu-box-title">El Tradici&oacute;nal</p>
+    <p class="menu-box-sub">Serves 10–12 guests</p>
+    <div class="menu-item">
+      <div class="menu-item-info">
+        <p class="menu-item-desc">12 chicken enchiladas &amp; 12 taquitos served with mexican rice, refried beans, guacamole, chips, lettuce, crema &amp; salsa.</p>
+      </div>
+      <span class="menu-item-price">$235</span>
+    </div>
+  </div>
+  <div class="menu-box">
+    <p class="menu-box-title">Fajita Trio Package</p>
+    <p class="menu-box-sub">Serves 15 guests</p>
+    <div class="menu-item">
+      <div class="menu-item-info">
+        <p class="menu-item-desc">A combination of chicken, beef &amp; shrimp fajitas. Served with refried beans, rice, guacamole, crema, salsa &amp; tortillas.</p>
+      </div>
+      <span class="menu-item-price">$265</span>
+    </div>
+  </div>
+  <div class="menu-box">
+    <p class="menu-box-title">Ensaladas Familiares</p>
+    <p class="menu-box-sub">Family size salads — serves 10–12 guests</p>
+    <div class="menu-item">
+      <div class="menu-item-info"><p class="menu-item-name">Amigo Salad</p></div>
+      <span class="menu-item-price">$80</span>
+    </div>
+    <div class="menu-item">
+      <div class="menu-item-info"><p class="menu-item-name">Fajita Salad</p></div>
+      <span class="menu-item-price">$120</span>
+    </div>
+    <div class="menu-item">
+      <div class="menu-item-info"><p class="menu-item-name">Pollo Asado Caesar Salad</p></div>
+      <span class="menu-item-price">$120</span>
+    </div>
+    <div class="menu-item">
+      <div class="menu-item-info"><p class="menu-item-name">Ceviche Salad</p></div>
+      <span class="menu-item-price">$140</span>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<div class="menu-footer">
+  <div class="menu-footer-logo">Amigos &#9733; Grill</div>
+  <p>3130 Alpine Rd, Suite 290 · Portola Valley, CA 94028</p>
+  <p>(650) 851-3997 · amigosportola.com</p>
+  <p style="margin-top:8px; font-size:10px;">Updated May 2025</p>
+  <p class="menu-footer-warn">Consuming raw or undercooked meats, poultry, seafood, shellfish, or eggs may increase your risk of foodborne illness, especially if you have certain medical conditions.</p>
+</div>
+
+</body>
+</html>

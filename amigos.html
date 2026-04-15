@@ -165,23 +165,11 @@
     z-index: 2;
   }
 
-  .ag-hero-header-logo {
-    font-family: 'Rye', serif;
-    font-size: clamp(30px, 5.5vw, 50px);
-    color: var(--gold);
-    font-weight: 400;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    text-shadow: 2px 2px 0 rgba(0,0,0,0.2);
-  }
-
-  .ag-hero-header-sub {
-    font-size: 12px;
-    letter-spacing: 0.25em;
-    text-transform: uppercase;
-    color: rgba(250,248,245,0.85);
-    margin-top: 4px;
-    font-weight: 400;
+  .ag-hero-header-logo img {
+    height: clamp(50px, 8vw, 80px);
+    width: auto;
+    display: block;
+    margin: 0 auto;
   }
 
   .ag-hero-address-bar {
@@ -965,8 +953,7 @@
 <!-- Hero -->
 <div class="ag-hero" id="hero">
   <div class="ag-hero-header">
-    <div class="ag-hero-header-logo">Amigos &#9733; Grill</div>
-    <div class="ag-hero-header-sub">Cocina Mexicana y Cantina</div>
+    <div class="ag-hero-header-logo"><img src="amigos-logo.png" alt="Amigos Grill — Cocina Mexicana y Cantina"></div>
   </div>
   <div class="ag-hero-address-bar">
     Located at Ladera Country Shopper, 3130 Alpine Road, Portola Valley, CA

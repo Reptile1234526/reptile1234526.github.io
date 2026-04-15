@@ -9,16 +9,19 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --green: #9DFF20;
-    --green-dim: rgba(157,255,32,0.15);
-    --green-dark: #7acc1a;
-    --dark: #0a0a0a;
-    --dark2: #141414;
-    --dark3: #1e1e1e;
-    --light: #f5f5f0;
-    --light2: #eaeae5;
-    --muted: rgba(245,245,240,0.5);
-    --muted-dark: #888;
+    --pink: #E91E90;
+    --pink-dim: rgba(233,30,144,0.15);
+    --purple: #6B5B95;
+    --purple-light: #8677a9;
+    --gold: #D4A843;
+    --gold-light: #f0cc6a;
+    --dark: #1a1020;
+    --dark2: #241830;
+    --dark3: #2e2040;
+    --light: #faf8f5;
+    --light2: #f0ece6;
+    --muted: rgba(250,248,245,0.5);
+    --muted-dark: #807070;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -36,8 +39,8 @@
     position: fixed;
     top: 16px;
     right: 16px;
-    background: rgba(10,10,10,0.6);
-    color: var(--green);
+    background: rgba(26,16,32,0.6);
+    color: var(--gold);
     text-decoration: none;
     font-size: 11px;
     padding: 8px 16px;
@@ -47,9 +50,9 @@
     z-index: 200;
     backdrop-filter: blur(12px);
     transition: background 0.2s;
-    border: 1px solid rgba(157,255,32,0.15);
+    border: 1px solid rgba(212,168,67,0.2);
   }
-  .ag-back:hover { background: rgba(10,10,10,0.85); }
+  .ag-back:hover { background: rgba(26,16,32,0.85); }
 
   /* ── Sticky Nav ── */
   .ag-nav {
@@ -64,17 +67,18 @@
   }
 
   .ag-nav.scrolled {
-    background: rgba(10,10,10,0.92);
+    background: rgba(233,30,144,0.95);
     backdrop-filter: blur(20px);
     padding: 14px 40px;
-    box-shadow: 0 1px 0 rgba(157,255,32,0.1);
+    box-shadow: 0 2px 20px rgba(233,30,144,0.3);
   }
 
   .ag-nav-logo {
     font-family: 'Source Serif 4', serif;
     font-size: 20px;
-    color: var(--green);
-    font-weight: 600;
+    color: var(--gold);
+    font-weight: 700;
+    letter-spacing: 0.02em;
   }
 
   .ag-nav-links {
@@ -84,14 +88,15 @@
   }
 
   .ag-nav-links a {
-    color: rgba(245,245,240,0.6);
+    color: rgba(250,248,245,0.7);
     text-decoration: none;
-    font-size: 13px;
-    font-family: 'IBM Plex Mono', monospace;
-    font-weight: 400;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 500;
     transition: color 0.2s;
   }
-  .ag-nav-links a:hover { color: var(--green); }
+  .ag-nav-links a:hover { color: var(--gold); }
 
   /* ── Hamburger ── */
   .ag-hamburger {
@@ -107,7 +112,7 @@
   .ag-hamburger span {
     width: 22px;
     height: 2px;
-    background: var(--green);
+    background: var(--gold);
     transition: transform 0.3s, opacity 0.3s;
     display: block;
   }
@@ -120,7 +125,7 @@
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(10,10,10,0.97);
+    background: rgba(26,16,32,0.97);
     z-index: 99;
     flex-direction: column;
     align-items: center;
@@ -138,7 +143,7 @@
     font-size: 32px;
     transition: color 0.2s;
   }
-  .ag-mobile-nav a:hover { color: var(--green); }
+  .ag-mobile-nav a:hover { color: var(--gold); }
 
   /* ── Hero ── */
   .ag-hero {
@@ -149,111 +154,164 @@
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
   }
 
-  .ag-hero-texture {
+  .ag-hero-header {
+    background: var(--pink);
+    text-align: center;
+    padding: 24px 40px 20px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .ag-hero-header-logo {
+    font-family: 'Source Serif 4', serif;
+    font-size: clamp(28px, 5vw, 42px);
+    color: var(--gold);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.15);
+  }
+
+  .ag-hero-header-sub {
+    font-size: 12px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: rgba(250,248,245,0.85);
+    margin-top: 4px;
+    font-weight: 400;
+  }
+
+  .ag-hero-address-bar {
+    background: var(--purple);
+    text-align: center;
+    padding: 10px 40px;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(250,248,245,0.85);
+    font-weight: 400;
+    position: relative;
+    z-index: 2;
+  }
+
+  .ag-hero-image {
+    flex: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-height: 500px;
+  }
+
+  .ag-hero-bg {
     position: absolute;
     inset: 0;
     background:
-      radial-gradient(circle at 20% 80%, rgba(157,255,32,0.06) 0%, transparent 50%),
-      radial-gradient(circle at 80% 20%, rgba(157,255,32,0.04) 0%, transparent 40%);
+      linear-gradient(135deg, #3a1a28 0%, #2a1838 30%, #1a1028 50%, #2a1020 70%, #3a1a28 100%);
     will-change: transform;
   }
 
-  .ag-hero-grid {
+  .ag-hero-bg-pattern {
     position: absolute;
     inset: 0;
-    background-image:
-      linear-gradient(rgba(157,255,32,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(157,255,32,0.03) 1px, transparent 1px);
-    background-size: 60px 60px;
+    background:
+      radial-gradient(circle at 50% 60%, rgba(233,30,144,0.08) 0%, transparent 50%),
+      radial-gradient(circle at 30% 40%, rgba(107,91,149,0.1) 0%, transparent 40%),
+      radial-gradient(circle at 70% 30%, rgba(212,168,67,0.06) 0%, transparent 40%);
     will-change: transform;
   }
 
   .ag-hero-content {
-    padding: 140px 48px 80px;
+    padding: 80px 48px 72px;
     position: relative;
     z-index: 1;
+    text-align: center;
     max-width: 700px;
-  }
-
-  .ag-hero-eyebrow {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 0.08em;
-    color: var(--green);
-    margin-bottom: 24px;
-    font-weight: 400;
+    margin: 0 auto;
   }
 
   .ag-hero-title {
     font-family: 'Source Serif 4', serif;
-    font-size: clamp(44px, 7vw, 72px);
-    line-height: 1.05;
+    font-size: clamp(36px, 6vw, 60px);
+    line-height: 1.1;
     color: var(--light);
-    margin-bottom: 24px;
-    font-weight: 700;
-  }
-
-  .ag-hero-title em {
+    margin-bottom: 20px;
+    font-weight: 400;
     font-style: italic;
-    color: var(--green);
   }
 
   .ag-hero-sub {
-    font-size: 16px;
-    color: var(--muted);
+    font-size: 14px;
+    color: rgba(250,248,245,0.65);
     font-weight: 300;
-    max-width: 420px;
+    max-width: 480px;
+    margin: 0 auto 36px;
     line-height: 1.7;
-    margin-bottom: 40px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
-  .ag-hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; }
+  .ag-hero-ctas {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+  }
 
   .ag-btn-primary {
-    background: var(--green);
-    color: var(--dark);
+    background: var(--purple);
+    color: var(--light);
     border: none;
-    padding: 14px 32px;
+    padding: 16px 48px;
     font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
     cursor: pointer;
-    border-radius: 100px;
+    border-radius: 2px;
     transition: background 0.25s, transform 0.2s;
     text-decoration: none;
     display: inline-block;
+    min-width: 300px;
+    text-align: center;
   }
-  .ag-btn-primary:hover { background: #b0ff4a; transform: translateY(-1px); }
+  .ag-btn-primary:hover { background: var(--purple-light); transform: translateY(-1px); }
 
   .ag-btn-outline {
     background: transparent;
     color: var(--light);
-    border: 1px solid rgba(245,245,240,0.2);
-    padding: 14px 32px;
+    border: 1px solid var(--purple);
+    padding: 16px 48px;
     font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 400;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
     cursor: pointer;
-    border-radius: 100px;
-    transition: border-color 0.25s, background 0.25s, transform 0.2s;
+    border-radius: 2px;
+    transition: background 0.25s, border-color 0.25s, transform 0.2s;
     text-decoration: none;
     display: inline-block;
+    min-width: 300px;
+    text-align: center;
   }
-  .ag-btn-outline:hover { border-color: var(--green); color: var(--green); transform: translateY(-1px); }
+  .ag-btn-outline:hover { background: var(--purple); transform: translateY(-1px); }
 
   .ag-hero-scroll {
     position: absolute;
-    bottom: 32px;
+    bottom: 28px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 8px;
-    color: rgba(245,245,240,0.25);
+    color: rgba(250,248,245,0.25);
     font-size: 10px;
     font-family: 'IBM Plex Mono', monospace;
     letter-spacing: 0.12em;
@@ -262,7 +320,7 @@
   .ag-hero-scroll-line {
     width: 1px;
     height: 32px;
-    background: linear-gradient(to bottom, rgba(157,255,32,0.4), transparent);
+    background: linear-gradient(to bottom, rgba(212,168,67,0.5), transparent);
   }
   @keyframes scrollBounce {
     0%, 100% { transform: translateX(-50%) translateY(0); }
@@ -271,30 +329,28 @@
 
   /* ── Info Strip ── */
   .ag-info-strip {
-    background: var(--dark2);
+    background: var(--pink);
     display: flex;
     justify-content: space-around;
-    padding: 16px 40px;
+    padding: 14px 40px;
     gap: 12px;
     flex-wrap: wrap;
-    border-top: 1px solid rgba(157,255,32,0.1);
-    border-bottom: 1px solid rgba(157,255,32,0.1);
   }
 
   .ag-info-item {
     display: flex;
     align-items: center;
     gap: 8px;
-    color: rgba(245,245,240,0.7);
+    color: rgba(250,248,245,0.9);
     font-size: 12px;
-    font-family: 'IBM Plex Mono', monospace;
     font-weight: 400;
+    letter-spacing: 0.04em;
   }
 
   .ag-info-dot {
     width: 5px;
     height: 5px;
-    background: var(--green);
+    background: var(--gold);
     border-radius: 50%;
     flex-shrink: 0;
   }
@@ -307,9 +363,10 @@
   .ag-section-label {
     font-size: 12px;
     font-family: 'IBM Plex Mono', monospace;
-    color: var(--green);
+    color: var(--pink);
     font-weight: 500;
     margin-bottom: 12px;
+    letter-spacing: 0.06em;
   }
 
   .ag-section-title {
@@ -349,11 +406,14 @@
 
   .ag-menu-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+    box-shadow: 0 12px 40px rgba(26,16,32,0.5);
     z-index: 2;
   }
 
-  .ag-menu-card:first-child { background: var(--dark3); border: 1px solid rgba(157,255,32,0.2); }
+  .ag-menu-card:first-child {
+    background: var(--purple);
+  }
+  .ag-menu-card:first-child:hover { box-shadow: 0 12px 40px rgba(107,91,149,0.4); }
 
   .ag-menu-card::after {
     content: '';
@@ -361,7 +421,7 @@
     bottom: 0;
     left: 0; right: 0;
     height: 2px;
-    background: var(--green);
+    background: var(--pink);
     transform: scaleX(0);
     transition: transform 0.35s;
   }
@@ -370,7 +430,7 @@
   .ag-menu-card-num {
     font-family: 'Source Serif 4', serif;
     font-size: 52px;
-    color: rgba(157,255,32,0.06);
+    color: rgba(233,30,144,0.08);
     font-weight: 700;
     position: absolute;
     top: 8px;
@@ -378,12 +438,12 @@
     line-height: 1;
     transition: color 0.35s;
   }
-  .ag-menu-card:hover .ag-menu-card-num { color: rgba(157,255,32,0.12); }
+  .ag-menu-card:hover .ag-menu-card-num { color: rgba(233,30,144,0.15); }
 
   .ag-menu-card-tag {
     font-size: 11px;
     font-family: 'IBM Plex Mono', monospace;
-    color: var(--green);
+    color: var(--gold);
     font-weight: 500;
     margin-bottom: 14px;
   }
@@ -399,7 +459,7 @@
 
   .ag-menu-card-desc {
     font-size: 13px;
-    color: rgba(245,245,240,0.45);
+    color: rgba(250,248,245,0.45);
     line-height: 1.7;
     font-weight: 300;
   }
@@ -434,14 +494,14 @@
   .ag-gallery-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, rgba(10,10,10,0.75) 0%, rgba(10,10,10,0.1) 50%, transparent 100%);
+    background: linear-gradient(to top, rgba(26,16,32,0.8) 0%, rgba(26,16,32,0.15) 50%, transparent 100%);
     display: flex;
     align-items: flex-end;
     padding: 28px;
     transition: background 0.35s;
   }
   .ag-gallery-item:hover .ag-gallery-overlay {
-    background: linear-gradient(to top, rgba(10,10,10,0.85) 0%, rgba(10,10,10,0.2) 60%, transparent 100%);
+    background: linear-gradient(to top, rgba(26,16,32,0.9) 0%, rgba(26,16,32,0.25) 60%, transparent 100%);
   }
 
   .ag-gallery-caption {
@@ -458,7 +518,7 @@
     font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
     font-weight: 400;
-    color: var(--green);
+    color: var(--gold);
     margin-top: 4px;
   }
 
@@ -476,7 +536,7 @@
   .ag-tequila-label {
     font-size: 12px;
     font-family: 'IBM Plex Mono', monospace;
-    color: var(--green);
+    color: var(--gold);
     font-weight: 500;
     margin-bottom: 12px;
   }
@@ -498,21 +558,26 @@
     margin-bottom: 32px;
   }
 
+  .ag-tequila .ag-btn-primary {
+    background: var(--pink);
+  }
+  .ag-tequila .ag-btn-primary:hover { background: #f03aa0; }
+
   .ag-tequila-visual { display: flex; flex-direction: column; gap: 8px; }
 
   .ag-cocktail-row {
-    background: rgba(157,255,32,0.03);
-    border: 1px solid rgba(157,255,32,0.08);
+    background: rgba(233,30,144,0.04);
+    border: 1px solid rgba(233,30,144,0.1);
     padding: 18px 22px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-radius: 8px;
+    border-radius: 4px;
     transition: background 0.25s, border-color 0.25s, transform 0.25s;
   }
   .ag-cocktail-row:hover {
-    background: rgba(157,255,32,0.06);
-    border-color: rgba(157,255,32,0.2);
+    background: rgba(233,30,144,0.08);
+    border-color: rgba(233,30,144,0.2);
     transform: translateX(4px);
   }
 
@@ -524,14 +589,14 @@
 
   .ag-cocktail-note {
     font-size: 12px;
-    color: rgba(245,245,240,0.35);
+    color: rgba(250,248,245,0.35);
     font-weight: 300;
     margin-top: 3px;
   }
 
   .ag-cocktail-price {
     font-size: 15px;
-    color: var(--green);
+    color: var(--gold);
     font-weight: 600;
     font-family: 'IBM Plex Mono', monospace;
   }
@@ -564,18 +629,18 @@
   .ag-review-card {
     background: var(--light);
     padding: 32px 28px;
-    border-radius: 12px;
+    border-radius: 8px;
     text-align: left;
-    border: 1px solid rgba(10,10,10,0.06);
+    border: 1px solid rgba(26,16,32,0.06);
     transition: transform 0.3s, box-shadow 0.3s;
   }
   .ag-review-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+    box-shadow: 0 8px 30px rgba(26,16,32,0.08);
   }
 
   .ag-review-stars {
-    color: var(--green);
+    color: var(--pink);
     font-size: 16px;
     letter-spacing: 2px;
     margin-bottom: 16px;
@@ -583,7 +648,7 @@
 
   .ag-review-text {
     font-size: 14px;
-    color: #333;
+    color: #3d2030;
     line-height: 1.75;
     font-weight: 300;
     font-style: italic;
@@ -612,7 +677,7 @@
     grid-template-columns: 1fr 1fr;
     gap: 48px;
     align-items: start;
-    border-top: 1px solid rgba(10,10,10,0.06);
+    border-top: 1px solid rgba(26,16,32,0.06);
   }
 
   .ag-hours-table {
@@ -624,7 +689,7 @@
   .ag-hours-table td {
     padding: 10px 0;
     font-size: 13px;
-    border-bottom: 1px solid rgba(10,10,10,0.06);
+    border-bottom: 1px solid rgba(26,16,32,0.06);
   }
 
   .ag-hours-table td:last-child {
@@ -634,10 +699,10 @@
   }
 
   .ag-map-wrapper {
-    border-radius: 12px;
+    border-radius: 8px;
     overflow: hidden;
     height: 280px;
-    border: 1px solid rgba(10,10,10,0.08);
+    border: 1px solid rgba(26,16,32,0.08);
   }
 
   .ag-map-wrapper iframe {
@@ -648,7 +713,7 @@
 
   /* ── CTA Banner ── */
   .ag-cta-banner {
-    background: var(--dark);
+    background: var(--purple);
     padding: 72px 48px;
     text-align: center;
     position: relative;
@@ -660,8 +725,8 @@
     position: absolute;
     inset: 0;
     background:
-      radial-gradient(circle at 30% 50%, rgba(157,255,32,0.08) 0%, transparent 50%),
-      radial-gradient(circle at 70% 50%, rgba(157,255,32,0.05) 0%, transparent 40%);
+      radial-gradient(circle at 30% 50%, rgba(233,30,144,0.15) 0%, transparent 50%),
+      radial-gradient(circle at 70% 50%, rgba(212,168,67,0.08) 0%, transparent 40%);
   }
 
   .ag-cta-banner-title {
@@ -673,11 +738,11 @@
     position: relative;
   }
 
-  .ag-cta-banner-title span { color: var(--green); }
+  .ag-cta-banner-title span { color: var(--gold); }
 
   .ag-cta-banner-sub {
     font-size: 15px;
-    color: var(--muted);
+    color: rgba(250,248,245,0.7);
     font-weight: 300;
     margin-bottom: 32px;
     position: relative;
@@ -691,44 +756,48 @@
     position: relative;
   }
 
-  .ag-btn-green {
-    background: var(--green);
+  .ag-btn-gold {
+    background: var(--gold);
     color: var(--dark);
     border: none;
     padding: 14px 32px;
     font-family: 'DM Sans', sans-serif;
     font-size: 14px;
     font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
     cursor: pointer;
-    border-radius: 100px;
+    border-radius: 2px;
     transition: background 0.25s, transform 0.2s;
     text-decoration: none;
     display: inline-block;
   }
-  .ag-btn-green:hover { background: #b0ff4a; transform: translateY(-1px); }
+  .ag-btn-gold:hover { background: var(--gold-light); transform: translateY(-1px); }
 
   .ag-btn-outline-light {
     background: transparent;
     color: var(--light);
-    border: 1px solid rgba(245,245,240,0.2);
+    border: 1px solid rgba(250,248,245,0.3);
     padding: 14px 32px;
     font-family: 'DM Sans', sans-serif;
     font-size: 14px;
     font-weight: 400;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
     cursor: pointer;
-    border-radius: 100px;
+    border-radius: 2px;
     transition: border-color 0.25s, color 0.25s, transform 0.2s;
     text-decoration: none;
     display: inline-block;
   }
-  .ag-btn-outline-light:hover { border-color: var(--green); color: var(--green); transform: translateY(-1px); }
+  .ag-btn-outline-light:hover { border-color: var(--gold); color: var(--gold); transform: translateY(-1px); }
 
   /* ── Footer ── */
   .ag-footer {
     background: var(--dark);
-    color: rgba(245,245,240,0.4);
+    color: rgba(250,248,245,0.4);
     padding: 56px 48px 32px;
-    border-top: 1px solid rgba(157,255,32,0.08);
+    border-top: 3px solid var(--pink);
   }
 
   .ag-footer-grid {
@@ -740,9 +809,9 @@
 
   .ag-footer-logo {
     font-family: 'Source Serif 4', serif;
-    color: var(--green);
+    color: var(--gold);
     font-size: 22px;
-    font-weight: 600;
+    font-weight: 700;
     margin-bottom: 12px;
   }
 
@@ -750,16 +819,18 @@
     font-size: 13px;
     line-height: 1.7;
     font-weight: 300;
-    color: rgba(245,245,240,0.35);
+    color: rgba(250,248,245,0.35);
     max-width: 280px;
   }
 
   .ag-footer-heading {
     font-size: 11px;
     font-family: 'IBM Plex Mono', monospace;
-    color: var(--green);
+    color: var(--pink);
     font-weight: 500;
     margin-bottom: 16px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
   }
 
   .ag-footer-links {
@@ -770,16 +841,16 @@
   }
 
   .ag-footer-links a {
-    color: rgba(245,245,240,0.45);
+    color: rgba(250,248,245,0.45);
     text-decoration: none;
     font-size: 13px;
     font-weight: 300;
     transition: color 0.2s;
   }
-  .ag-footer-links a:hover { color: var(--green); }
+  .ag-footer-links a:hover { color: var(--gold); }
 
   .ag-footer-bottom {
-    border-top: 1px solid rgba(245,245,240,0.06);
+    border-top: 1px solid rgba(250,248,245,0.06);
     padding-top: 24px;
     display: flex;
     justify-content: space-between;
@@ -811,7 +882,8 @@
 
     .ag-nav { padding: 16px 24px; }
     .ag-nav.scrolled { padding: 12px 24px; }
-    .ag-hero-content { padding: 100px 24px 60px; }
+    .ag-hero-content { padding: 60px 24px; }
+    .ag-hero-header { padding: 20px 24px 16px; }
     .ag-section { padding: 64px 24px; }
 
     .ag-gallery {
@@ -843,6 +915,8 @@
       grid-template-columns: 1fr 1fr;
       gap: 32px;
     }
+
+    .ag-btn-primary, .ag-btn-outline { min-width: auto; width: 100%; }
   }
 
   @media (max-width: 480px) {
@@ -887,20 +961,28 @@
 
 <!-- Hero -->
 <div class="ag-hero" id="hero">
-  <div class="ag-hero-texture" id="heroTexture"></div>
-  <div class="ag-hero-grid" id="heroGrid"></div>
-  <div class="ag-hero-content ag-reveal">
-    <p class="ag-hero-eyebrow">// Portola Valley, CA &mdash; est. 2006</p>
-    <h1 class="ag-hero-title">Cocina Mexicana<br><em>y Cantina</em></h1>
-    <p class="ag-hero-sub">Family-owned since 2006. Home of Don Pilar craft tequila. Fresh ingredients, outdoor patio, and margaritas worth the drive.</p>
-    <div class="ag-hero-ctas">
-      <a href="#menu" class="ag-btn-primary">View Full Menu</a>
-      <a href="tel:6508513997" class="ag-btn-outline">Order Takeout</a>
-    </div>
+  <div class="ag-hero-header">
+    <div class="ag-hero-header-logo">Amigos Grill</div>
+    <div class="ag-hero-header-sub">Cocina Mexicana y Cantina</div>
   </div>
-  <div class="ag-hero-scroll">
-    <span>scroll</span>
-    <div class="ag-hero-scroll-line"></div>
+  <div class="ag-hero-address-bar">
+    Located at Ladera Country Shopper, 3130 Alpine Road, Portola Valley, CA
+  </div>
+  <div class="ag-hero-image">
+    <div class="ag-hero-bg" id="heroBg"></div>
+    <div class="ag-hero-bg-pattern" id="heroBgPattern"></div>
+    <div class="ag-hero-content ag-reveal">
+      <h1 class="ag-hero-title">Cocina Mexicana y Cantina</h1>
+      <p class="ag-hero-sub">Open since 2006, Amigos Grill is a family-owned Mexican restaurant in Portola Valley, California</p>
+      <div class="ag-hero-ctas">
+        <a href="#menu" class="ag-btn-primary">Check Out Our Menu</a>
+        <a href="tel:6508513997" class="ag-btn-outline">Call to Order &nbsp;650.851.3997</a>
+      </div>
+    </div>
+    <div class="ag-hero-scroll">
+      <span>scroll</span>
+      <div class="ag-hero-scroll-line"></div>
+    </div>
   </div>
 </div>
 
@@ -915,32 +997,32 @@
 <!-- Menu -->
 <div class="ag-section" id="menu" style="background: var(--light);">
   <div class="ag-reveal">
-    <p class="ag-section-label">// from the kitchen</p>
+    <p class="ag-section-label">From the Kitchen</p>
     <h2 class="ag-section-title">What we're known for</h2>
     <p class="ag-section-sub">Gourmet Mexican in the heart of Ladera Country Shopper. Everything made fresh, everything made with care.</p>
   </div>
   <div class="ag-menu-grid">
     <div class="ag-menu-card ag-reveal ag-reveal-delay-1">
       <span class="ag-menu-card-num">01</span>
-      <p class="ag-menu-card-tag">// fan favorite</p>
+      <p class="ag-menu-card-tag">Fan Favorite</p>
       <p class="ag-menu-card-name">Carne Asada Ribeye</p>
       <p class="ag-menu-card-desc">Jalisco-style skirt steak, black beans, avocado, roasted chiles &amp; corn tortillas.</p>
     </div>
     <div class="ag-menu-card ag-reveal ag-reveal-delay-2">
       <span class="ag-menu-card-num">02</span>
-      <p class="ag-menu-card-tag">// signature</p>
+      <p class="ag-menu-card-tag">Signature</p>
       <p class="ag-menu-card-name">Tortilla Soup</p>
       <p class="ag-menu-card-desc">Rich tomato broth, queso fresco, crema, avocado, crispy tortilla strips.</p>
     </div>
     <div class="ag-menu-card ag-reveal ag-reveal-delay-2">
       <span class="ag-menu-card-num">03</span>
-      <p class="ag-menu-card-tag">// classic</p>
+      <p class="ag-menu-card-tag">Classic</p>
       <p class="ag-menu-card-name">Gourmet Burrito</p>
       <p class="ag-menu-card-desc">Grilled chicken or carne asada, black beans, rice, guacamole &amp; salsa verde.</p>
     </div>
     <div class="ag-menu-card ag-reveal ag-reveal-delay-3">
       <span class="ag-menu-card-num">04</span>
-      <p class="ag-menu-card-tag">// from Jalisco</p>
+      <p class="ag-menu-card-tag">From Jalisco</p>
       <p class="ag-menu-card-name">Carne en su Jugo</p>
       <p class="ag-menu-card-desc">Slow-braised beef in rich broth, bacon, cilantro, onions, lime &amp; corn tortillas.</p>
     </div>
@@ -950,31 +1032,31 @@
 <!-- Gallery -->
 <div class="ag-gallery" id="gallery">
   <div class="ag-gallery-item ag-reveal">
-    <div class="ag-gallery-bg" style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d1a 40%, #3d4a1a 100%);"></div>
+    <div class="ag-gallery-bg" style="background: linear-gradient(135deg, #3a1a28 0%, #5a2a3a 40%, #7a3a4a 100%);"></div>
     <div class="ag-gallery-overlay">
       <div class="ag-gallery-caption">Patio Dining<small>sun-drenched outdoor seating</small></div>
     </div>
   </div>
   <div class="ag-gallery-item ag-reveal ag-reveal-delay-1">
-    <div class="ag-gallery-bg" style="background: linear-gradient(135deg, #2a2a0a 0%, #4a5a1a 60%, #6a7a2a 100%);"></div>
+    <div class="ag-gallery-bg" style="background: linear-gradient(135deg, #4a2838 0%, #6b3a4a 60%, #8a4a5a 100%);"></div>
     <div class="ag-gallery-overlay">
       <div class="ag-gallery-caption">Fresh Guacamole<small>made tableside</small></div>
     </div>
   </div>
   <div class="ag-gallery-item ag-reveal ag-reveal-delay-2">
-    <div class="ag-gallery-bg" style="background: linear-gradient(135deg, #1a2a0a 0%, #3a4a1a 60%, #5a6a2a 100%);"></div>
+    <div class="ag-gallery-bg" style="background: linear-gradient(135deg, #2a1838 0%, #4a2848 60%, #6b3858 100%);"></div>
     <div class="ag-gallery-overlay">
       <div class="ag-gallery-caption">Craft Margaritas<small>Don Pilar tequila</small></div>
     </div>
   </div>
   <div class="ag-gallery-item ag-reveal ag-reveal-delay-1">
-    <div class="ag-gallery-bg" style="background: linear-gradient(135deg, #0a0a0a 0%, #1a2a0a 40%, #3d4a1a 100%);"></div>
+    <div class="ag-gallery-bg" style="background: linear-gradient(135deg, #1a1020 0%, #3a1a28 40%, #6b3040 100%);"></div>
     <div class="ag-gallery-overlay">
       <div class="ag-gallery-caption">Carne Asada<small>Jalisco-style ribeye</small></div>
     </div>
   </div>
   <div class="ag-gallery-item ag-reveal ag-reveal-delay-2">
-    <div class="ag-gallery-bg" style="background: linear-gradient(135deg, #141414 0%, #2a3a0a 50%, #4a5a1a 100%);"></div>
+    <div class="ag-gallery-bg" style="background: linear-gradient(135deg, #241830 0%, #4a2040 50%, #7a3858 100%);"></div>
     <div class="ag-gallery-overlay">
       <div class="ag-gallery-caption">The Cantina<small>warm ambiance nightly</small></div>
     </div>
@@ -984,7 +1066,7 @@
 <!-- Cantina -->
 <div class="ag-tequila" id="cantina">
   <div class="ag-reveal">
-    <p class="ag-tequila-label">// the cantina</p>
+    <p class="ag-tequila-label">The Cantina</p>
     <h2 class="ag-tequila-title">Home of<br>Don Pilar Tequila</h2>
     <p class="ag-tequila-body">Amigos Grill is the home base of Don Pilar &mdash; an award-winning craft tequila made without additives. Every margarita is mixed with the real thing.</p>
     <a href="#" class="ag-btn-primary">See Full Drink Menu</a>
@@ -1024,7 +1106,7 @@
 <!-- Testimonials -->
 <div class="ag-testimonials" id="reviews">
   <div class="ag-reveal">
-    <p class="ag-section-label">// what people say</p>
+    <p class="ag-section-label">What People Say</p>
     <h2 class="ag-section-title">Loved by the Community</h2>
     <p class="ag-section-sub">A neighborhood favorite since 2006.</p>
   </div>
@@ -1053,7 +1135,7 @@
 <!-- Location -->
 <div class="ag-location" id="location">
   <div class="ag-reveal">
-    <p class="ag-section-label">// find us</p>
+    <p class="ag-section-label">Find Us</p>
     <h2 class="ag-section-title">Visit the Patio</h2>
     <p style="font-size: 14px; color: var(--muted-dark); line-height: 1.7; font-weight: 300; margin-bottom: 20px;">We're at the Ladera Country Shopper on Alpine Road &mdash; right off 280. Dog-friendly patio, no reservations needed.</p>
     <table class="ag-hours-table">
@@ -1076,7 +1158,7 @@
   <h2 class="ag-cta-banner-title ag-reveal">Ready for <span>Real Mexican</span>?</h2>
   <p class="ag-cta-banner-sub ag-reveal ag-reveal-delay-1">Walk in anytime or call ahead for takeout &amp; catering.</p>
   <div class="ag-cta-btns ag-reveal ag-reveal-delay-2">
-    <a href="tel:6508513997" class="ag-btn-green">Call to Order</a>
+    <a href="tel:6508513997" class="ag-btn-gold">Call to Order</a>
     <a href="https://maps.google.com/maps?daddr=3130+Alpine+Rd,+Portola+Valley,+CA+94028" target="_blank" class="ag-btn-outline-light">Get Directions</a>
   </div>
 </div>
@@ -1089,7 +1171,7 @@
       <p class="ag-footer-desc">Family-owned Mexican restaurant and cantina in Portola Valley. Home of Don Pilar craft tequila.</p>
     </div>
     <div>
-      <p class="ag-footer-heading">navigate</p>
+      <p class="ag-footer-heading">Navigate</p>
       <ul class="ag-footer-links">
         <li><a href="#menu">Menu</a></li>
         <li><a href="#cantina">Cantina</a></li>
@@ -1099,7 +1181,7 @@
       </ul>
     </div>
     <div>
-      <p class="ag-footer-heading">contact</p>
+      <p class="ag-footer-heading">Contact</p>
       <ul class="ag-footer-links">
         <li><a href="tel:6508513997">(650) 851-3997</a></li>
         <li><a href="#">amigos@email.com</a></li>
@@ -1107,7 +1189,7 @@
       </ul>
     </div>
     <div>
-      <p class="ag-footer-heading">social</p>
+      <p class="ag-footer-heading">Social</p>
       <ul class="ag-footer-links">
         <li><a href="#">Instagram</a></li>
         <li><a href="#">Facebook</a></li>
@@ -1147,14 +1229,14 @@
   });
 
   // Parallax
-  const heroTexture = document.getElementById('heroTexture');
-  const heroGrid = document.getElementById('heroGrid');
+  const heroBg = document.getElementById('heroBg');
+  const heroBgPattern = document.getElementById('heroBgPattern');
 
   window.addEventListener('scroll', () => {
     const y = window.scrollY;
     if (y < window.innerHeight) {
-      heroTexture.style.transform = `translateY(${y * 0.3}px)`;
-      heroGrid.style.transform = `translateY(${y * 0.15}px)`;
+      heroBg.style.transform = `translateY(${y * 0.3}px)`;
+      heroBgPattern.style.transform = `translateY(${y * 0.15}px)`;
     }
   }, { passive: true });
 

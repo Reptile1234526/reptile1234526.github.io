@@ -199,18 +199,14 @@
   .ag-hero-bg {
     position: absolute;
     inset: 0;
-    background:
-      linear-gradient(135deg, #3a1a28 0%, #2a1838 30%, #1a1028 50%, #2a1020 70%, #3a1a28 100%);
+    background: url('gallery-4.jpg') center/cover no-repeat;
     will-change: transform;
   }
 
   .ag-hero-bg-pattern {
     position: absolute;
     inset: 0;
-    background:
-      radial-gradient(circle at 50% 60%, rgba(233,30,144,0.08) 0%, transparent 50%),
-      radial-gradient(circle at 30% 40%, rgba(107,91,149,0.1) 0%, transparent 40%),
-      radial-gradient(circle at 70% 30%, rgba(212,168,67,0.06) 0%, transparent 40%);
+    background: linear-gradient(to top, rgba(26,16,32,0.92) 0%, rgba(26,16,32,0.6) 40%, rgba(26,16,32,0.75) 100%);
     will-change: transform;
   }
 
@@ -827,6 +823,76 @@
     gap: 8px;
   }
 
+  /* ── Lightbox ── */
+  .ag-lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(10,6,16,0.95);
+    z-index: 300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    cursor: zoom-out;
+  }
+  .ag-lightbox.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .ag-lightbox img {
+    max-width: 90vw;
+    max-height: 85vh;
+    object-fit: contain;
+    border-radius: 6px;
+    transform: scale(0.92);
+    transition: transform 0.35s ease-out;
+  }
+  .ag-lightbox.open img { transform: scale(1); }
+  .ag-lightbox-caption {
+    position: absolute;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--light);
+    font-family: 'Source Serif 4', serif;
+    font-size: 18px;
+    font-weight: 600;
+    text-align: center;
+    opacity: 0.85;
+  }
+  .ag-lightbox-close {
+    position: absolute;
+    top: 20px;
+    right: 28px;
+    color: var(--light);
+    font-size: 32px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+    line-height: 1;
+  }
+  .ag-lightbox-close:hover { opacity: 1; }
+  .ag-lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--light);
+    font-size: 36px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+    padding: 16px;
+  }
+  .ag-lightbox-nav:hover { opacity: 1; }
+  .ag-lightbox-prev { left: 12px; }
+  .ag-lightbox-next { right: 12px; }
+
   /* ── Scroll animations ── */
   .ag-reveal {
     opacity: 0;
@@ -1158,9 +1224,9 @@
     <div>
       <p class="ag-footer-heading">Social</p>
       <ul class="ag-footer-links">
-        <li><a href="#">Instagram</a></li>
-        <li><a href="#">Facebook</a></li>
-        <li><a href="#">Yelp</a></li>
+        <li><a href="https://www.instagram.com/amigosgrillpv/" target="_blank">Instagram</a></li>
+        <li><a href="https://www.facebook.com/amigosgrillpv" target="_blank">Facebook</a></li>
+        <li><a href="https://www.yelp.com/biz/amigos-grill-cocina-mexicana-y-cantina-portola-valley" target="_blank">Yelp</a></li>
       </ul>
     </div>
   </div>
@@ -1170,7 +1236,58 @@
   </div>
 </div>
 
+<!-- Lightbox -->
+<div class="ag-lightbox" id="lightbox">
+  <button class="ag-lightbox-close" aria-label="Close">&times;</button>
+  <button class="ag-lightbox-nav ag-lightbox-prev" aria-label="Previous">&#8249;</button>
+  <button class="ag-lightbox-nav ag-lightbox-next" aria-label="Next">&#8250;</button>
+  <img src="" alt="" id="lightboxImg">
+  <div class="ag-lightbox-caption" id="lightboxCaption"></div>
+</div>
+
 <script>
+  // Lightbox
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightboxImg');
+  const lightboxCaption = document.getElementById('lightboxCaption');
+  const galleryItems = document.querySelectorAll('.ag-gallery-item');
+  const galleryData = Array.from(galleryItems).map(item => ({
+    src: item.querySelector('.ag-gallery-bg').style.backgroundImage.slice(5, -2),
+    caption: item.querySelector('.ag-gallery-caption').textContent
+  }));
+  let currentIndex = 0;
+
+  function openLightbox(i) {
+    currentIndex = i;
+    lightboxImg.src = galleryData[i].src;
+    lightboxCaption.textContent = galleryData[i].caption;
+    lightbox.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    lightbox.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  galleryItems.forEach((item, i) => item.addEventListener('click', () => openLightbox(i)));
+  lightbox.querySelector('.ag-lightbox-close').addEventListener('click', closeLightbox);
+  lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+  lightbox.querySelector('.ag-lightbox-prev').addEventListener('click', (e) => {
+    e.stopPropagation();
+    openLightbox((currentIndex - 1 + galleryData.length) % galleryData.length);
+  });
+  lightbox.querySelector('.ag-lightbox-next').addEventListener('click', (e) => {
+    e.stopPropagation();
+    openLightbox((currentIndex + 1) % galleryData.length);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (!lightbox.classList.contains('open')) return;
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') openLightbox((currentIndex - 1 + galleryData.length) % galleryData.length);
+    if (e.key === 'ArrowRight') openLightbox((currentIndex + 1) % galleryData.length);
+  });
+
   // Sticky nav
   const nav = document.getElementById('mainNav');
   window.addEventListener('scroll', () => {

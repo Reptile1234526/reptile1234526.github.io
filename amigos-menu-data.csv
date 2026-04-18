@@ -1,0 +1,66 @@
+Section,Name,Description,Price,Note
+Antojitos,Guacamole con Chips,,$13.75,
+Antojitos,Bandera Nachos,"Chips with melted monterey jack cheese, guacamole, refried beans, crema & salsa.",$14.95,Add meat +$2.50
+Antojitos,Queso Fundido,"Skillet of melted cheese. Served with tortillas.",$13.95,Add chorizo +$2
+Antojitos,Ceviche Costeno,"Red snapper & shrimp cooked in lime juice and onions. Served with salsa mexicana, avocado & chips.",$16.25,
+Antojitos,Sopesitos,"Three fried corn masa boats filled with meat, refried beans, guacamole, crema, salsa & queso fresco.",$14.95,
+Antojitos,Tamales,"Two chicken or pork tamales, mild tomato salsa, crema & queso fresco.",$13.45,
+Sopas,Sopa de Tortilla,"Tomato-chile broth with queso fresco, crema, avocado, pasilla strips & tortilla strips.",$11.50,Add chicken +$1.95
+Sopas,Coctel de Camaron,"Shrimp cocktail served in a broth with onions, avocado, cucumber, tomatoes, cilantro & salsa.",$19.50,
+Ensaladas,Amigo Salad,"Romaine lettuce, tomatoes, jicama & queso fresco. Served with cilantro-jalapeno dressing.",$12.50,
+Ensaladas,Fajita Salad,"Crispy tortilla bowl with beef, chicken or shrimp fajitas, black beans, melted cheese, lettuce, tomato, red bell pepper, red onions & cilantro-jalapeno dressing.",$18.95,Add shrimp fajitas +$2
+Ensaladas,Pollo Asado Caesar Salad,"Romaine lettuce, queso fresco, tortilla strips, chicken breast & cilantro-guacamole caesar dressing.",$18.50,
+Ensaladas,Ceviche Salad,"Romaine lettuce, cucumber, avocado, tomatoes, shrimp, red snapper cooked in lime juice, onions & cilantro-jalapeno dressing.",$19.50,
+Quesadillas,Amigo Quesadilla,"Guacamole, crema & salsa.",$12.95,Add meat +$2.95
+Quesadillas,Quesadilla de Vegetales,"Spinach, corn & zucchini on a spinach tortilla. Topped with salsa.",$12.75,
+Quesadillas,Quesadilla con Camarones,"Shrimp, grilled corn, onions & mushrooms on a tomato tortilla. Topped with salsa mexicana.",$18.95,
+Quesadillas,Fajita Quesadilla,"Beef, chicken or shrimp fajitas with guacamole, crema & salsa mexicana.",$18.95,
+Burritos,Amigo Burrito,"Meat, rice, pinto beans, guacamole, cheese, sour cream & salsa.",$16.95,"Add $2 for wet burrito with salsa verde, sour cream & melted cheese"
+Burritos,Burrito Rojo,"Grilled chicken, black beans, rice, guacamole & salsa. Topped with melted cheese, sour cream & red mole sauce on a tomato tortilla.",$17.45,
+Burritos,Burrito del Mar,"Shrimp, red bell pepper, grilled corn, onions, refried beans & rice. Topped with melted cheese & salsa verde on a tomato tortilla.",$18.95,
+Burritos,Burrito Vegetariano,"Rice, beans, guacamole, cheese, sour cream, zucchini, tomatoes, spinach, corn, onions & salsa mexicana on a spinach tortilla.",$15.25,
+Burritos,Baby Burrito,"Rice, refried beans & cheese.",$10.95,
+Tacos,Amigo Taco,"Meat, cilantro, onions & salsa roja.",$3.95,Add cheese +50c
+Tacos,Amigo Taco Especial,"Same as above, with cheese, guacamole & crema mexicana.",$5.95,
+Tacos,Tacos de Plaza,"Two Amigo tacos with a side of rice, refried beans, guacamole & roasted chiles.",$16.95,
+Tacos,Taco de Pescado,"Two tacos with grilled red snapper served with lettuce, onions, cilantro, jalapeno dressing & melted cheese. Served over cilantro rice.",$15.45,
+Tacos,Taquitos,"Three fried tacos with chicken & mashed potato, topped with crema, queso fresco, guacamole, lettuce & mild tomato salsa.",$13.45,
+Platos Fuertes,Platillo de Carne Asada,"Ribeye steak, rice, black beans, guacamole, salsa mexicana, scallions & tortillas.",$25.95,
+Platos Fuertes,Carnitas Michoacanas,"Braised pork carnitas, refried beans, mexican rice, guacamole, salsa, roasted chile & tortillas.",$21.95,
+Platos Fuertes,Fajitas,"Sizzling fajitas of beef, chicken or shrimp, sauteed with vegetables. Served with rice, beans, guacamole & tortillas.",$21.95,Add shrimp +$2
+Platos Fuertes,Enchiladas,"Three chicken enchiladas with red, green or chocolate mole sauce. Served with green rice & black beans.",$17.95,Add chocolate mole +$2.50
+Platos Fuertes,Carne en su Jugo,"Jalisco-style slow cooked beef in a rich broth with bacon, cilantro, onions, lime, radishes & tortillas.",$18.95,
+Platos Fuertes,Chile Relleno,"Two chiles rellenos in a mild red sauce with rice, beans & tortillas.",$19.95,
+Platos Fuertes,Pollo Marinado,"Grilled chicken breast in an adobo marinade with rice, beans, sauteed vegetables & tortillas.",$19.95,
+Combinados,One Item,,$12.95,
+Combinados,Two Items,,$15.95,
+Combinados,Three Items,,$17.95,
+Kids Menu,Kids Plate,,$10.50,
+Desserts,Flan,"Custard dessert topped with caramel.",$5.75,
+Desayuno,Huevos Rancheros,"Two fried eggs served over corn tortillas with refried beans, smothered with salsa verde and queso fresco. Served with mexican rice.",$15.95,
+Desayuno,Chilaquiles Jalisco,"Crispy corn tortilla chips sauteed in a roasted tomato sauce, topped with queso fresco, avocado & onions. Served with refried beans & mexican rice.",$15.95,Add two fried eggs +$3
+Desayuno,Huevos con Chorizo,"Two scrambled eggs with chorizo, refried beans, mexican rice & roasted jalapeno.",$15.95,
+Desayuno,Breakfast Burrito,"Two scrambled eggs with mexican salsa, black beans, cilantro rice, avocado & sour cream, wrapped in a spinach tortilla.",$14.95,
+Desayuno,Huevos a la Mexicana,"Two scrambled eggs sauteed with pico de gallo salsa. Served with rice, refried beans & roasted jalapeno.",$14.95,
+Desayuno,Omelette Mexicano,"Omelette with cheese, bell pepper, onions, mushrooms, mild salsa, tortillas and your choice of ham or chorizo.",$17.95,
+Margaritas & Tequila,Autentica Margarita,"Tequila, agave nectar, lime juice","$14 / pitcher $45",
+Margaritas & Tequila,Amigos Margarita,"Tequila, sweet-n-sour, agave nectar, lime juice","$14 / pitcher $45",
+Margaritas & Tequila,Flavored Margarita,"Mango, Blood Orange, Strawberry, Guava, Prickly Pear","$14 / pitcher $45",
+Margaritas & Tequila,Jalapeno Margarita,Jalapeno-infused blanco tequila,"$14 / pitcher $56",
+Margaritas & Tequila,Paloma,"Tequila, Squirt, lime juice","$14 / pitcher $56",
+Margaritas & Tequila,Mexican Mule,"Tequila, ginger beer, lime juice, agave nectar","$14.50 / pitcher $58",
+Margaritas & Tequila,La Cazuela,"Tequila, citrus juices and fruit, agave nectar, Squirt. Terracotta bowl for 2-3.",$25,
+Margaritas & Tequila,Tequila Don Pilar,"Blanco $11 / Reposado $13 / Anejo $15 / Extra-Anejo $30",from $11,
+Beverages & Beer,Aguas Frescas,20 oz.,$4.50,
+Beverages & Beer,Sodas,,$4.50,
+Beverages & Beer,Beer,"Draft: XX Lager, XX Amber, Stella Artois, Deschutes. Bottled: Corona, Pacifico, Modelo, Victoria, Bohemia & more.",$9 - $11,
+Beverages & Beer,Michelada,"Beer, lime juice, worcestershire, salt, tomato juice, chile sauce.",$14,
+Beverages & Beer,Wine,"Reds: Poppy Pinot Noir, Trefethen Merlot, William Hill & J. Lohr Cabernet. Whites: Trefethen Chardonnay, Dry Creek Sauvignon Blanc. Rose: Rabble.",,
+Catering,Kids Pinata Package,"20 chicken taquitos & 20 cheese enchiladas served with rice, refried beans, chips & salsa.",$235,Serves 20 kids
+Catering,El Tradicional,"12 chicken enchiladas & 12 taquitos served with mexican rice, refried beans, guacamole, chips, lettuce, crema & salsa.",$235,Serves 10-12 guests
+Catering,Fajita Trio Package,"A combination of chicken, beef & shrimp fajitas. Served with refried beans, rice, guacamole, crema, salsa & tortillas.",$265,Serves 15 guests
+Catering,Ensaladas Familiares,,,Family size salads - serves 10-12 guests
+Catering,> Amigo Salad,,$80,
+Catering,> Fajita Salad,,$120,
+Catering,> Pollo Asado Caesar Salad,,$120,
+Catering,> Ceviche Salad,,$140,

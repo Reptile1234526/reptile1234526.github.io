@@ -4,8 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Amigos Grill — Portola Valley, CA</title>
+<meta name="description" content="Family-owned Mexican restaurant and cantina in Portola Valley, CA. Home of Don Pilar craft tequila. Dine-in, takeout & catering. Open daily 10am–9:30pm.">
+<meta property="og:title" content="Amigos Grill — Cocina Mexicana y Cantina">
+<meta property="og:description" content="Family-owned Mexican restaurant in Portola Valley. Gourmet Mexican, craft margaritas & Don Pilar tequila. Open daily 10am–9:30pm.">
+<meta property="og:image" content="https://reptile1234526.github.io/gallery-4.jpg">
+<meta property="og:url" content="https://reptile1234526.github.io/amigos.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/png" href="amigos-favicon.png">
 <link rel="apple-touch-icon" href="amigos-favicon.png">
+<link rel="preload" as="image" href="gallery-4.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=Rye&display=swap" rel="stylesheet">
@@ -1065,31 +1073,31 @@
 <!-- Gallery -->
 <div class="ag-gallery" id="gallery">
   <div class="ag-gallery-item ag-reveal">
-    <div class="ag-gallery-bg" style="background-image: url('gallery-1.jpg');"></div>
+    <div class="ag-gallery-bg ag-lazy" data-bg="gallery-1.jpg"></div>
     <div class="ag-gallery-overlay">
       <div class="ag-gallery-caption">Carne en su Jugo</div>
     </div>
   </div>
   <div class="ag-gallery-item ag-reveal ag-reveal-delay-1">
-    <div class="ag-gallery-bg" style="background-image: url('gallery-2.jpg');"></div>
+    <div class="ag-gallery-bg ag-lazy" data-bg="gallery-2.jpg"></div>
     <div class="ag-gallery-overlay">
       <div class="ag-gallery-caption">Enchiladas Rojas</div>
     </div>
   </div>
   <div class="ag-gallery-item ag-reveal ag-reveal-delay-2">
-    <div class="ag-gallery-bg" style="background-image: url('gallery-3.jpg');"></div>
+    <div class="ag-gallery-bg ag-lazy" data-bg="gallery-3.jpg"></div>
     <div class="ag-gallery-overlay">
       <div class="ag-gallery-caption">Palomas</div>
     </div>
   </div>
   <div class="ag-gallery-item ag-reveal ag-reveal-delay-1">
-    <div class="ag-gallery-bg" style="background-image: url('gallery-4.jpg');"></div>
+    <div class="ag-gallery-bg ag-lazy" data-bg="gallery-4.jpg"></div>
     <div class="ag-gallery-overlay">
       <div class="ag-gallery-caption">Carne Asada Ribeye</div>
     </div>
   </div>
   <div class="ag-gallery-item ag-reveal ag-reveal-delay-2">
-    <div class="ag-gallery-bg" style="background-image: url('gallery-5.jpg');"></div>
+    <div class="ag-gallery-bg ag-lazy" data-bg="gallery-5.jpg"></div>
     <div class="ag-gallery-overlay">
       <div class="ag-gallery-caption">Tequila Don Pilar</div>
     </div>
@@ -1163,6 +1171,9 @@
       <p class="ag-review-source">Yelp · Mar 2026</p>
     </div>
   </div>
+  <div style="text-align: center; margin-top: 40px;" class="ag-reveal ag-reveal-delay-3">
+    <a href="https://www.google.com/maps/search/Amigos+Grill+3130+Alpine+Rd+Portola+Valley+CA" target="_blank" class="ag-btn-outline" style="font-size: 13px; padding: 14px 32px;">Leave a Review on Google</a>
+  </div>
 </div>
 
 <!-- Location -->
@@ -1217,8 +1228,8 @@
       <p class="ag-footer-heading">Contact</p>
       <ul class="ag-footer-links">
         <li><a href="tel:6508513997">(650) 851-3997</a></li>
-        <li><a href="#">amigos@email.com</a></li>
-        <li><a href="#">Catering Inquiry</a></li>
+        <li><a href="https://www.google.com/maps/search/Amigos+Grill+3130+Alpine+Rd+Portola+Valley+CA" target="_blank">Google Maps</a></li>
+        <li><a href="tel:6508513997">Catering &mdash; Call Us</a></li>
       </ul>
     </div>
     <div>
@@ -1336,6 +1347,20 @@
   }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
 
   revealEls.forEach(el => revealObserver.observe(el));
+
+  // Lazy-load gallery backgrounds
+  const lazyObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.backgroundImage = `url('${entry.target.dataset.bg}')`;
+        entry.target.style.backgroundSize = 'cover';
+        entry.target.style.backgroundPosition = 'center';
+        lazyObserver.unobserve(entry.target);
+      }
+    });
+  }, { rootMargin: '200px' });
+
+  document.querySelectorAll('.ag-lazy').forEach(el => lazyObserver.observe(el));
 </script>
 
 </body>

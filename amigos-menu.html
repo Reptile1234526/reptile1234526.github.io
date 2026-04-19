@@ -470,6 +470,25 @@
   }
   .cart-option-select:focus { outline: none; border-color: var(--purple); }
 
+  .cart-addon {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--dark);
+    cursor: pointer;
+    padding: 3px 0;
+  }
+  .cart-addon input[type="checkbox"] {
+    accent-color: var(--purple);
+    cursor: pointer;
+  }
+  .cart-addon-price {
+    color: var(--purple);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+  }
+
   .cart-footer {
     border-top: 2px solid var(--pink);
     padding: 20px 24px;
@@ -1001,24 +1020,38 @@ const CUSTOMIZATIONS = {
   'Kids Plate': { label: 'Choice', options: ['Cheese Quesadilla', 'Chicken Taquito', 'Enchilada'] },
 };
 
-const cart = {}; // { itemId: { name, price, qty, option, customization } }
+// Add-ons: extra-cost options parsed from menu notes
+const ADDONS = {
+  'Bandera Nachos': [{ label: 'Add meat', price: 2.50 }],
+  'Queso Fundido': [{ label: 'Add chorizo', price: 2.00 }],
+  'Sopa de Tortilla': [{ label: 'Add chicken', price: 1.95 }],
+  'Fajita Salad': [{ label: 'Add shrimp fajitas', price: 2.00 }],
+  'Amigo Quesadilla': [{ label: 'Add meat', price: 2.95 }],
+  'Amigo Taco': [{ label: 'Add cheese', price: 0.50 }],
+  'Amigo Burrito': [{ label: 'Make wet burrito', price: 2.00 }],
+  'Fajitas': [{ label: 'Add shrimp', price: 2.00 }],
+  'Enchiladas': [{ label: 'Add chocolate mole', price: 2.50 }],
+  'Chilaquiles Jalisco': [{ label: 'Add two fried eggs', price: 3.00 }],
+};
+
+const cart = {}; // { itemId: { name, price, qty, option, addons, ... } }
 
 function addToCart(id, name, price, btnEl) {
   const custom = CUSTOMIZATIONS[name];
+  const itemAddons = ADDONS[name] || null;
   if (custom) {
-    // Item needs customization — use option in the ID so different choices are separate items
     const defaultOption = custom.options[0];
     const customId = id + '_' + defaultOption.replace(/[^a-zA-Z]/g, '');
     if (cart[customId]) {
       cart[customId].qty++;
     } else {
-      cart[customId] = { name, price, qty: 1, option: defaultOption, customLabel: custom.label, customOptions: custom.options, baseId: id };
+      cart[customId] = { name, price, qty: 1, option: defaultOption, customLabel: custom.label, customOptions: custom.options, baseId: id, addons: itemAddons ? itemAddons.map(a => ({ ...a, checked: false })) : null };
     }
   } else {
     if (cart[id]) {
       cart[id].qty++;
     } else {
-      cart[id] = { name, price, qty: 1 };
+      cart[id] = { name, price, qty: 1, addons: itemAddons ? itemAddons.map(a => ({ ...a, checked: false })) : null };
     }
   }
   // Button feedback
@@ -1057,6 +1090,12 @@ function changeOption(oldId, newOption) {
   updateCartUI();
 }
 
+function toggleAddon(id, addonIdx) {
+  if (!cart[id] || !cart[id].addons) return;
+  cart[id].addons[addonIdx].checked = !cart[id].addons[addonIdx].checked;
+  updateCartUI();
+}
+
 function removeFromCart(id) {
   delete cart[id];
   updateCartUI();
@@ -1076,7 +1115,10 @@ function getCartCount() {
 }
 
 function getCartSubtotal() {
-  return Object.values(cart).reduce((sum, item) => sum + item.price * item.qty, 0);
+  return Object.values(cart).reduce((sum, item) => {
+    const addonCost = item.addons ? item.addons.filter(a => a.checked).reduce((s, a) => s + a.price, 0) : 0;
+    return sum + (item.price + addonCost) * item.qty;
+  }, 0);
 }
 
 function updateCartUI() {
@@ -1109,11 +1151,19 @@ function updateCartUI() {
       });
       optionHtml += '</select>';
     }
+    let addonsHtml = '';
+    if (item.addons && item.addons.length > 0) {
+      item.addons.forEach((addon, ai) => {
+        addonsHtml += `<label class="cart-addon"><input type="checkbox" ${addon.checked ? 'checked' : ''} onchange="toggleAddon('${id}', ${ai})"> ${esc(addon.label)} <span class="cart-addon-price">+$${addon.price.toFixed(2)}</span></label>`;
+      });
+    }
+    const itemTotal = item.price + (item.addons ? item.addons.filter(a => a.checked).reduce((s, a) => s + a.price, 0) : 0);
     html += `<div class="cart-item">
       <div class="cart-item-info">
         <p class="cart-item-name">${item.name}</p>
         ${optionHtml}
-        <p class="cart-item-price">$${item.price.toFixed(2)}</p>
+        ${addonsHtml}
+        <p class="cart-item-price">$${itemTotal.toFixed(2)}${itemTotal !== item.price ? ' ea' : ''}</p>
       </div>
       <div class="cart-item-qty">
         <button class="qty-btn" onclick="changeQty('${id}', -1)">&minus;</button>
@@ -1162,9 +1212,12 @@ function showCheckout() {
   let summaryHtml = '';
   Object.values(cart).forEach(item => {
     const optLabel = item.option ? ` (${item.option})` : '';
+    const addonLabels = item.addons ? item.addons.filter(a => a.checked).map(a => a.label).join(', ') : '';
+    const addonCost = item.addons ? item.addons.filter(a => a.checked).reduce((s, a) => s + a.price, 0) : 0;
+    const lineTotal = (item.price + addonCost) * item.qty;
     summaryHtml += `<div class="order-summary-item">
-      <span>${item.qty}x ${item.name}${optLabel}</span>
-      <span>$${(item.price * item.qty).toFixed(2)}</span>
+      <span>${item.qty}x ${item.name}${optLabel}${addonLabels ? ' + ' + addonLabels : ''}</span>
+      <span>$${lineTotal.toFixed(2)}</span>
     </div>`;
   });
   summaryHtml += `<div class="order-summary-item" style="border-top:1px solid rgba(26,16,32,0.1);padding-top:6px;margin-top:6px;font-weight:600">
@@ -1229,7 +1282,10 @@ document.addEventListener('submit', async function(e) {
   let orderText = '';
   Object.values(cart).forEach(item => {
     const optStr = item.option ? ` [${item.option}]` : '';
-    orderText += `${item.qty}x ${item.name}${optStr} ($${item.price.toFixed(2)} ea) = $${(item.price * item.qty).toFixed(2)}\n`;
+    const addonStr = item.addons ? item.addons.filter(a => a.checked).map(a => `+ ${a.label} (+$${a.price.toFixed(2)})`).join(', ') : '';
+    const addonCost = item.addons ? item.addons.filter(a => a.checked).reduce((s, a) => s + a.price, 0) : 0;
+    const lineTotal = (item.price + addonCost) * item.qty;
+    orderText += `${item.qty}x ${item.name}${optStr}${addonStr ? ' ' + addonStr : ''} = $${lineTotal.toFixed(2)}\n`;
   });
   orderText += `\nSubtotal: $${getCartSubtotal().toFixed(2)}`;
   document.getElementById('orderItemsField').value = orderText;

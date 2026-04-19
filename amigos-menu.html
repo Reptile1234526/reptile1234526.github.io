@@ -259,6 +259,320 @@
     line-height: 1.5;
   }
 
+  /* Add to cart button */
+  .add-btn {
+    background: var(--purple);
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-size: 11px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+  .add-btn:hover { background: var(--pink); transform: scale(1.05); }
+  .add-btn.added { background: #06d6a0; }
+
+  .menu-item-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  /* Dark box variants */
+  .menu-box .add-btn { background: var(--gold); color: var(--dark); }
+  .menu-box .add-btn:hover { background: var(--gold-light); }
+  .drink-card .add-btn { background: var(--gold); color: var(--dark); margin-top: 8px; }
+  .drink-card .add-btn:hover { background: var(--gold-light); }
+
+  /* Floating cart button */
+  .cart-fab {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--pink);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 20px rgba(233,30,144,0.4);
+    transition: all 0.2s;
+    z-index: 100;
+  }
+  .cart-fab:hover { transform: scale(1.1); box-shadow: 0 6px 28px rgba(233,30,144,0.5); }
+  .cart-fab-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: var(--purple);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--light);
+  }
+
+  /* Cart drawer */
+  .cart-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(26,16,32,0.5);
+    z-index: 200;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  .cart-overlay.open { opacity: 1; pointer-events: auto; }
+
+  .cart-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 400px;
+    max-width: 100vw;
+    height: 100%;
+    background: var(--light);
+    z-index: 201;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    box-shadow: -4px 0 30px rgba(0,0,0,0.2);
+  }
+  .cart-drawer.open { transform: translateX(0); }
+
+  .cart-header {
+    background: var(--pink);
+    color: #fff;
+    padding: 20px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .cart-header h3 {
+    font-family: 'Source Serif 4', serif;
+    font-size: 20px;
+    font-weight: 600;
+  }
+  .cart-close {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 4px 8px;
+    line-height: 1;
+  }
+
+  .cart-items {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 24px;
+  }
+  .cart-empty {
+    text-align: center;
+    color: var(--muted-dark);
+    padding: 40px 0;
+    font-size: 14px;
+  }
+
+  .cart-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(26,16,32,0.08);
+  }
+  .cart-item-info { flex: 1; }
+  .cart-item-name {
+    font-family: 'Source Serif 4', serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--dark);
+  }
+  .cart-item-price {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--pink);
+    margin-top: 2px;
+  }
+  .cart-item-qty {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .qty-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 1px solid rgba(26,16,32,0.15);
+    background: #fff;
+    color: var(--dark);
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+  }
+  .qty-btn:hover { border-color: var(--pink); color: var(--pink); }
+  .qty-num {
+    font-size: 14px;
+    font-weight: 600;
+    min-width: 18px;
+    text-align: center;
+  }
+  .cart-item-remove {
+    background: none;
+    border: none;
+    color: var(--muted-dark);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+    transition: color 0.15s;
+  }
+  .cart-item-remove:hover { color: #e63946; }
+
+  .cart-footer {
+    border-top: 2px solid var(--pink);
+    padding: 20px 24px;
+    flex-shrink: 0;
+    background: #fff;
+  }
+  .cart-subtotal {
+    display: flex;
+    justify-content: space-between;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+  .cart-subtotal-price {
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--pink);
+    font-size: 18px;
+  }
+  .cart-note {
+    font-size: 11px;
+    color: var(--muted-dark);
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+  .checkout-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--purple);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .checkout-btn:hover { background: var(--pink); }
+  .checkout-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* Checkout form */
+  .checkout-form {
+    padding: 20px 24px;
+    flex: 1;
+    overflow-y: auto;
+  }
+  .checkout-form h4 {
+    font-family: 'Source Serif 4', serif;
+    font-size: 18px;
+    margin-bottom: 16px;
+    color: var(--dark);
+  }
+  .form-group {
+    margin-bottom: 14px;
+  }
+  .form-group label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted-dark);
+    margin-bottom: 5px;
+  }
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid rgba(26,16,32,0.15);
+    border-radius: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    background: #fff;
+    color: var(--dark);
+    transition: border-color 0.2s;
+  }
+  .form-group input:focus,
+  .form-group textarea:focus,
+  .form-group select:focus {
+    outline: none;
+    border-color: var(--purple);
+  }
+  .form-group textarea { resize: vertical; min-height: 60px; }
+  .checkout-back {
+    background: none;
+    border: none;
+    color: var(--purple);
+    font-size: 13px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    margin-top: 10px;
+    text-decoration: underline;
+  }
+
+  .order-summary {
+    background: rgba(26,16,32,0.04);
+    border-radius: 6px;
+    padding: 14px;
+    margin-bottom: 16px;
+    max-height: 150px;
+    overflow-y: auto;
+  }
+  .order-summary-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    padding: 3px 0;
+    color: var(--dark);
+  }
+  .order-summary-item span:last-child {
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--pink);
+  }
+
   @media (max-width: 600px) {
     .menu-section { padding: 40px 20px 24px; }
     .drinks-grid { grid-template-columns: 1fr; }
@@ -266,6 +580,8 @@
     .menu-nav a { font-size: 10px; }
     .menu-header { padding: 16px 20px; }
     .menu-header img { height: 44px; }
+    .cart-drawer { width: 100vw; }
+    .add-btn { padding: 5px 10px; font-size: 10px; }
   }
 </style>
 </head>
@@ -282,6 +598,34 @@
 
 <div id="menuContent">
   <div class="menu-loading">Loading menu...</div>
+</div>
+
+<!-- Cart FAB -->
+<button class="cart-fab" id="cartFab" onclick="toggleCart()" style="display:none">
+  &#128722;
+  <span class="cart-fab-badge" id="cartBadge">0</span>
+</button>
+
+<!-- Cart overlay -->
+<div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+
+<!-- Cart drawer -->
+<div class="cart-drawer" id="cartDrawer">
+  <div class="cart-header">
+    <h3>Your Order</h3>
+    <button class="cart-close" onclick="toggleCart()">&times;</button>
+  </div>
+  <div class="cart-items" id="cartItems">
+    <div class="cart-empty">Your cart is empty</div>
+  </div>
+  <div class="cart-footer" id="cartFooter" style="display:none">
+    <div class="cart-subtotal">
+      <span>Subtotal</span>
+      <span class="cart-subtotal-price" id="cartSubtotal">$0.00</span>
+    </div>
+    <div class="cart-note">Tax and gratuity not included. Pickup order only.</div>
+    <button class="checkout-btn" id="checkoutBtn" onclick="showCheckout()">Checkout</button>
+  </div>
 </div>
 
 <div class="menu-footer">
@@ -374,25 +718,39 @@ function groupBySection(data) {
   return groups;
 }
 
+// Parse a price string to a number (takes first dollar amount found)
+function parsePrice(priceStr) {
+  if (!priceStr) return 0;
+  const match = priceStr.match(/\$(\d+(?:\.\d+)?)/);
+  return match ? parseFloat(match[1]) : 0;
+}
+
 // Render a standard menu item
 function renderItem(item) {
   const name = item.Name.replace(/^>\s*/, '');
+  const price = parsePrice(item.Price);
+  const itemId = btoa(unescape(encodeURIComponent((item.Section || '') + '|' + name))).replace(/=/g, '');
   let html = '<div class="menu-item"><div class="menu-item-info">';
   if (name) html += `<p class="menu-item-name">${esc(name)}</p>`;
   if (item.Description) html += `<p class="menu-item-desc">${esc(item.Description)}</p>`;
   if (item.Note) html += `<p class="menu-item-note">${esc(item.Note)}</p>`;
   html += '</div>';
+  html += '<div class="menu-item-right">';
   if (item.Price) html += `<span class="menu-item-price">${esc(item.Price)}</span>`;
-  html += '</div>';
+  if (price > 0) html += `<button class="add-btn" id="add-${itemId}" onclick="addToCart('${itemId}', '${esc(name).replace(/'/g,"\\'")}', ${price}, this)">+ Add</button>`;
+  html += '</div></div>';
   return html;
 }
 
 // Render drink card
 function renderDrinkCard(item) {
+  const price = parsePrice(item.Price);
+  const itemId = btoa(unescape(encodeURIComponent((item.Section || '') + '|' + item.Name))).replace(/=/g, '');
   let html = '<div class="drink-card">';
   html += `<p class="drink-card-name">${esc(item.Name)}</p>`;
   if (item.Description) html += `<p class="drink-card-desc">${esc(item.Description)}</p>`;
   if (item.Price) html += `<p class="drink-card-price">${esc(item.Price)}</p>`;
+  if (price > 0) html += `<button class="add-btn" id="add-${itemId}" onclick="addToCart('${itemId}', '${esc(item.Name).replace(/'/g,"\\'")}', ${price}, this)">+ Add</button>`;
   html += '</div>';
   return html;
 }
@@ -424,14 +782,18 @@ function renderCatering(items) {
       boxHasItems = false;
     } else if (isSingleBox) {
       if (inBox) { html += '</div>'; inBox = false; }
+      const price = parsePrice(item.Price);
+      const itemId = btoa(unescape(encodeURIComponent('Catering|' + item.Name))).replace(/=/g, '');
       html += '<div class="menu-box">';
       html += `<p class="menu-box-title">${esc(item.Name)}</p>`;
       if (item.Note) html += `<p class="menu-box-sub">${esc(item.Note)}</p>`;
       html += '<div class="menu-item"><div class="menu-item-info">';
       html += `<p class="menu-item-desc">${esc(item.Description)}</p>`;
       html += '</div>';
+      html += '<div class="menu-item-right">';
       html += `<span class="menu-item-price">${esc(item.Price)}</span>`;
-      html += '</div></div>';
+      if (price > 0) html += `<button class="add-btn" id="add-${itemId}" onclick="addToCart('${itemId}', '${esc(item.Name).replace(/'/g,"\\'")}', ${price}, this)">+ Add</button>`;
+      html += '</div></div></div>';
     }
   });
 
@@ -597,6 +959,193 @@ const FALLBACK_DATA = [
   {Section:'Catering',Name:'> Pollo Asado Caesar Salad',Description:'',Price:'$120',Note:''},
   {Section:'Catering',Name:'> Ceviche Salad',Description:'',Price:'$140',Note:''},
 ];
+
+// =====================================================
+// CART / ORDERING SYSTEM
+// =====================================================
+const cart = {}; // { itemId: { name, price, qty } }
+
+function addToCart(id, name, price, btnEl) {
+  if (cart[id]) {
+    cart[id].qty++;
+  } else {
+    cart[id] = { name, price, qty: 1 };
+  }
+  // Button feedback
+  if (btnEl) {
+    btnEl.textContent = '\u2713 Added';
+    btnEl.classList.add('added');
+    setTimeout(() => {
+      btnEl.textContent = '+ Add';
+      btnEl.classList.remove('added');
+    }, 800);
+  }
+  updateCartUI();
+}
+
+function removeFromCart(id) {
+  delete cart[id];
+  updateCartUI();
+}
+
+function changeQty(id, delta) {
+  if (!cart[id]) return;
+  cart[id].qty += delta;
+  if (cart[id].qty <= 0) {
+    delete cart[id];
+  }
+  updateCartUI();
+}
+
+function getCartCount() {
+  return Object.values(cart).reduce((sum, item) => sum + item.qty, 0);
+}
+
+function getCartSubtotal() {
+  return Object.values(cart).reduce((sum, item) => sum + item.price * item.qty, 0);
+}
+
+function updateCartUI() {
+  const count = getCartCount();
+  const fab = document.getElementById('cartFab');
+  const badge = document.getElementById('cartBadge');
+  const itemsEl = document.getElementById('cartItems');
+  const footerEl = document.getElementById('cartFooter');
+  const subtotalEl = document.getElementById('cartSubtotal');
+
+  // FAB visibility
+  fab.style.display = count > 0 ? 'flex' : 'none';
+  badge.textContent = count;
+
+  // Cart items
+  if (count === 0) {
+    itemsEl.innerHTML = '<div class="cart-empty">Your cart is empty</div>';
+    footerEl.style.display = 'none';
+    return;
+  }
+
+  footerEl.style.display = 'block';
+  let html = '';
+  Object.entries(cart).forEach(([id, item]) => {
+    html += `<div class="cart-item">
+      <div class="cart-item-info">
+        <p class="cart-item-name">${item.name}</p>
+        <p class="cart-item-price">$${item.price.toFixed(2)}</p>
+      </div>
+      <div class="cart-item-qty">
+        <button class="qty-btn" onclick="changeQty('${id}', -1)">&minus;</button>
+        <span class="qty-num">${item.qty}</span>
+        <button class="qty-btn" onclick="changeQty('${id}', 1)">+</button>
+      </div>
+      <button class="cart-item-remove" onclick="removeFromCart('${id}')">&times;</button>
+    </div>`;
+  });
+  itemsEl.innerHTML = html;
+  subtotalEl.textContent = '$' + getCartSubtotal().toFixed(2);
+}
+
+function toggleCart() {
+  const overlay = document.getElementById('cartOverlay');
+  const drawer = document.getElementById('cartDrawer');
+  const isOpen = drawer.classList.contains('open');
+  overlay.classList.toggle('open', !isOpen);
+  drawer.classList.toggle('open', !isOpen);
+  // Reset to cart view if closing
+  if (isOpen) resetCartView();
+}
+
+function resetCartView() {
+  document.getElementById('cartItems').style.display = '';
+  document.getElementById('cartFooter').style.display = getCartCount() > 0 ? 'block' : 'none';
+  const checkoutForm = document.getElementById('checkoutForm');
+  if (checkoutForm) checkoutForm.remove();
+}
+
+function showCheckout() {
+  document.getElementById('cartItems').style.display = 'none';
+  document.getElementById('cartFooter').style.display = 'none';
+
+  // Build order summary + form
+  const drawer = document.getElementById('cartDrawer');
+
+  // Remove existing form if any
+  const existing = document.getElementById('checkoutForm');
+  if (existing) existing.remove();
+
+  const form = document.createElement('div');
+  form.id = 'checkoutForm';
+  form.className = 'checkout-form';
+
+  let summaryHtml = '';
+  Object.values(cart).forEach(item => {
+    summaryHtml += `<div class="order-summary-item">
+      <span>${item.qty}x ${item.name}</span>
+      <span>$${(item.price * item.qty).toFixed(2)}</span>
+    </div>`;
+  });
+  summaryHtml += `<div class="order-summary-item" style="border-top:1px solid rgba(26,16,32,0.1);padding-top:6px;margin-top:6px;font-weight:600">
+    <span>Subtotal</span>
+    <span>$${getCartSubtotal().toFixed(2)}</span>
+  </div>`;
+
+  // Generate pickup time options (every 15 min for next 3 hours)
+  const now = new Date();
+  let timeOptions = '<option value="">Select a time</option>';
+  const roundedMin = Math.ceil(now.getMinutes() / 15) * 15 + 30; // start 30 min from now
+  for (let i = 0; i < 12; i++) {
+    const t = new Date(now);
+    t.setMinutes(roundedMin + i * 15, 0, 0);
+    const h = t.getHours();
+    const m = t.getMinutes().toString().padStart(2, '0');
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const h12 = h % 12 || 12;
+    const label = `${h12}:${m} ${ampm}`;
+    timeOptions += `<option value="${label}">${label}</option>`;
+  }
+
+  form.innerHTML = `
+    <h4>Pickup Order</h4>
+    <div class="order-summary">${summaryHtml}</div>
+    <form id="orderForm" action="https://formsubmit.co/avibuxbaum@gmail.com" method="POST">
+      <input type="hidden" name="_subject" value="New Pickup Order - Amigos Grill">
+      <input type="hidden" name="_captcha" value="false">
+      <input type="hidden" name="_next" value="${window.location.href}">
+      <input type="hidden" name="order_items" id="orderItemsField">
+      <input type="hidden" name="order_total" id="orderTotalField">
+      <div class="form-group">
+        <label>Name *</label>
+        <input type="text" name="name" required placeholder="Your name">
+      </div>
+      <div class="form-group">
+        <label>Phone *</label>
+        <input type="tel" name="phone" required placeholder="(650) 555-1234">
+      </div>
+      <div class="form-group">
+        <label>Pickup Time *</label>
+        <select name="pickup_time" required>${timeOptions}</select>
+      </div>
+      <div class="form-group">
+        <label>Special Instructions</label>
+        <textarea name="instructions" placeholder="Allergies, modifications, etc."></textarea>
+      </div>
+      <button type="submit" class="checkout-btn" onclick="prepareOrder()">Place Order</button>
+    </form>
+    <button class="checkout-back" onclick="resetCartView()">&larr; Back to cart</button>
+  `;
+
+  drawer.insertBefore(form, document.getElementById('cartFooter'));
+}
+
+function prepareOrder() {
+  // Serialize cart into hidden fields
+  let orderText = '';
+  Object.values(cart).forEach(item => {
+    orderText += `${item.qty}x ${item.name} ($${item.price.toFixed(2)} ea) = $${(item.price * item.qty).toFixed(2)}\n`;
+  });
+  orderText += `\nSubtotal: $${getCartSubtotal().toFixed(2)}`;
+  document.getElementById('orderItemsField').value = orderText;
+  document.getElementById('orderTotalField').value = '$' + getCartSubtotal().toFixed(2);
+}
 
 loadMenu();
 </script>

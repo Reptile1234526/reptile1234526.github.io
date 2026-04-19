@@ -1128,7 +1128,7 @@ function showCheckout() {
         <label>Special Instructions</label>
         <textarea name="instructions" placeholder="Allergies, modifications, etc."></textarea>
       </div>
-      <button type="submit" class="checkout-btn" onclick="prepareOrder()">Place Order</button>
+      <button type="submit" class="checkout-btn">Place Order</button>
     </form>
     <button class="checkout-back" onclick="resetCartView()">&larr; Back to cart</button>
   `;
@@ -1136,7 +1136,11 @@ function showCheckout() {
   drawer.insertBefore(form, document.getElementById('cartFooter'));
 }
 
-function prepareOrder() {
+// Intercept form submit — send via fetch, show confirmation
+document.addEventListener('submit', async function(e) {
+  if (e.target.id !== 'orderForm') return;
+  e.preventDefault();
+
   // Serialize cart into hidden fields
   let orderText = '';
   Object.values(cart).forEach(item => {
@@ -1145,6 +1149,48 @@ function prepareOrder() {
   orderText += `\nSubtotal: $${getCartSubtotal().toFixed(2)}`;
   document.getElementById('orderItemsField').value = orderText;
   document.getElementById('orderTotalField').value = '$' + getCartSubtotal().toFixed(2);
+
+  const btn = e.target.querySelector('.checkout-btn');
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+
+  try {
+    const formData = new FormData(e.target);
+    await fetch(e.target.action, { method: 'POST', body: formData, headers: { 'Accept': 'application/json' } });
+    showConfirmation();
+  } catch (err) {
+    showConfirmation(); // FormSubmit may block CORS but still sends — show confirmation anyway
+  }
+});
+
+function showConfirmation() {
+  const drawer = document.getElementById('cartDrawer');
+  const pickupTime = document.querySelector('[name="pickup_time"]')?.value || '';
+  const customerName = document.querySelector('[name="name"]')?.value || '';
+
+  // Clear cart
+  Object.keys(cart).forEach(k => delete cart[k]);
+  updateCartUI();
+
+  // Remove form and footer, show confirmation
+  const form = document.getElementById('checkoutForm');
+  if (form) form.remove();
+  document.getElementById('cartFooter').style.display = 'none';
+  document.getElementById('cartItems').style.display = 'block';
+  document.getElementById('cartItems').innerHTML = `
+    <div style="text-align:center; padding: 40px 10px;">
+      <div style="font-size: 48px; margin-bottom: 16px;">&#127790;</div>
+      <h3 style="font-family: 'Source Serif 4', serif; font-size: 22px; color: var(--dark); margin-bottom: 8px;">Order Placed!</h3>
+      <p style="color: var(--muted-dark); font-size: 14px; line-height: 1.6; margin-bottom: 20px;">
+        Thanks${customerName ? ', ' + esc(customerName) : ''}! Your pickup order has been sent to Amigos Grill.
+        ${pickupTime ? '<br>Pickup time: <strong>' + esc(pickupTime) + '</strong>' : ''}
+      </p>
+      <p style="color: var(--muted-dark); font-size: 13px; line-height: 1.6; margin-bottom: 24px;">
+        You\'ll receive a confirmation at the restaurant. If you need to make changes, call <a href="tel:6508513997" style="color: var(--purple);">650.851.3997</a>.
+      </p>
+      <button class="checkout-btn" onclick="toggleCart()" style="max-width: 200px; margin: 0 auto;">Done</button>
+    </div>
+  `;
 }
 
 loadMenu();

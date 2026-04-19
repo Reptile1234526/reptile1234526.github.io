@@ -456,6 +456,20 @@
   }
   .cart-item-remove:hover { color: #e63946; }
 
+  .cart-option-select {
+    width: 100%;
+    padding: 5px 8px;
+    border: 1px solid rgba(26,16,32,0.15);
+    border-radius: 4px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: var(--dark);
+    background: #fff;
+    margin: 4px 0 2px;
+    cursor: pointer;
+  }
+  .cart-option-select:focus { outline: none; border-color: var(--purple); }
+
   .cart-footer {
     border-top: 2px solid var(--pink);
     padding: 20px 24px;
@@ -963,13 +977,49 @@ const FALLBACK_DATA = [
 // =====================================================
 // CART / ORDERING SYSTEM
 // =====================================================
-const cart = {}; // { itemId: { name, price, qty } }
+
+// Customization options for items that need a choice
+const CUSTOMIZATIONS = {
+  'Amigo Taco': { label: 'Meat', options: ['Carne Asada', 'Pollo', 'Carnitas', 'Al Pastor', 'Chorizo'] },
+  'Amigo Taco Especial': { label: 'Meat', options: ['Carne Asada', 'Pollo', 'Carnitas', 'Al Pastor', 'Chorizo'] },
+  'Tacos de Plaza': { label: 'Meat', options: ['Carne Asada', 'Pollo', 'Carnitas', 'Al Pastor', 'Chorizo'] },
+  'Sopesitos': { label: 'Meat', options: ['Carne Asada', 'Pollo', 'Carnitas', 'Al Pastor', 'Chorizo'] },
+  'Amigo Burrito': { label: 'Meat', options: ['Carne Asada', 'Pollo', 'Carnitas', 'Al Pastor', 'Chorizo'] },
+  'Amigo Quesadilla': { label: 'Meat', options: ['No Meat', 'Carne Asada', 'Pollo', 'Carnitas', 'Al Pastor', 'Chorizo'] },
+  'Fajitas': { label: 'Protein', options: ['Chicken', 'Beef', 'Shrimp', 'Chicken & Beef', 'Chicken & Shrimp'] },
+  'Fajita Salad': { label: 'Protein', options: ['Chicken', 'Beef', 'Shrimp'] },
+  'Fajita Quesadilla': { label: 'Protein', options: ['Chicken', 'Beef', 'Shrimp'] },
+  'Tamales': { label: 'Filling', options: ['Chicken', 'Pork'] },
+  'Enchiladas': { label: 'Sauce', options: ['Red Sauce', 'Green Sauce', 'Chocolate Mole (+$2.50)'] },
+  'Chile Relleno': { label: 'Filling', options: ['Cheese', 'Beef', 'Chicken'] },
+  'Flavored Margarita': { label: 'Flavor', options: ['Mango', 'Blood Orange', 'Strawberry', 'Guava', 'Prickly Pear'] },
+  'Omelette Mexicano': { label: 'Meat', options: ['Ham', 'Chorizo'] },
+  'Combinados': { label: 'Items', options: ['Enchilada', 'Soft Taco', 'Hard Taco', 'Taquito', 'Tamal'] },
+  'One Item': { label: 'Choice', options: ['Enchilada', 'Soft Taco', 'Hard Taco', 'Taquito', 'Tamal'] },
+  'Two Items': { label: 'Choices', options: ['Enchilada', 'Soft Taco', 'Hard Taco', 'Taquito', 'Tamal'] },
+  'Three Items': { label: 'Choices', options: ['Enchilada', 'Soft Taco', 'Hard Taco', 'Taquito', 'Tamal'] },
+  'Kids Plate': { label: 'Choice', options: ['Cheese Quesadilla', 'Chicken Taquito', 'Enchilada'] },
+};
+
+const cart = {}; // { itemId: { name, price, qty, option, customization } }
 
 function addToCart(id, name, price, btnEl) {
-  if (cart[id]) {
-    cart[id].qty++;
+  const custom = CUSTOMIZATIONS[name];
+  if (custom) {
+    // Item needs customization — use option in the ID so different choices are separate items
+    const defaultOption = custom.options[0];
+    const customId = id + '_' + defaultOption.replace(/[^a-zA-Z]/g, '');
+    if (cart[customId]) {
+      cart[customId].qty++;
+    } else {
+      cart[customId] = { name, price, qty: 1, option: defaultOption, customLabel: custom.label, customOptions: custom.options, baseId: id };
+    }
   } else {
-    cart[id] = { name, price, qty: 1 };
+    if (cart[id]) {
+      cart[id].qty++;
+    } else {
+      cart[id] = { name, price, qty: 1 };
+    }
   }
   // Button feedback
   if (btnEl) {
@@ -979,6 +1029,30 @@ function addToCart(id, name, price, btnEl) {
       btnEl.textContent = '+ Add';
       btnEl.classList.remove('added');
     }, 800);
+  }
+  updateCartUI();
+  // Open cart if item has customization so user can pick
+  if (custom) {
+    const overlay = document.getElementById('cartOverlay');
+    const drawer = document.getElementById('cartDrawer');
+    overlay.classList.add('open');
+    drawer.classList.add('open');
+  }
+}
+
+function changeOption(oldId, newOption) {
+  const item = cart[oldId];
+  if (!item) return;
+  const newId = item.baseId + '_' + newOption.replace(/[^a-zA-Z]/g, '');
+  if (newId === oldId) { item.option = newOption; return; }
+  if (cart[newId]) {
+    // Merge into existing item with same option
+    cart[newId].qty += item.qty;
+    delete cart[oldId];
+  } else {
+    // Rename the entry
+    cart[newId] = { ...item, option: newOption };
+    delete cart[oldId];
   }
   updateCartUI();
 }
@@ -1027,9 +1101,18 @@ function updateCartUI() {
   footerEl.style.display = 'block';
   let html = '';
   Object.entries(cart).forEach(([id, item]) => {
+    let optionHtml = '';
+    if (item.customOptions) {
+      optionHtml = `<select class="cart-option-select" onchange="changeOption('${id}', this.value)">`;
+      item.customOptions.forEach(opt => {
+        optionHtml += `<option value="${esc(opt)}"${opt === item.option ? ' selected' : ''}>${esc(opt)}</option>`;
+      });
+      optionHtml += '</select>';
+    }
     html += `<div class="cart-item">
       <div class="cart-item-info">
         <p class="cart-item-name">${item.name}</p>
+        ${optionHtml}
         <p class="cart-item-price">$${item.price.toFixed(2)}</p>
       </div>
       <div class="cart-item-qty">
@@ -1078,8 +1161,9 @@ function showCheckout() {
 
   let summaryHtml = '';
   Object.values(cart).forEach(item => {
+    const optLabel = item.option ? ` (${item.option})` : '';
     summaryHtml += `<div class="order-summary-item">
-      <span>${item.qty}x ${item.name}</span>
+      <span>${item.qty}x ${item.name}${optLabel}</span>
       <span>$${(item.price * item.qty).toFixed(2)}</span>
     </div>`;
   });
@@ -1144,7 +1228,8 @@ document.addEventListener('submit', async function(e) {
   // Serialize cart into hidden fields
   let orderText = '';
   Object.values(cart).forEach(item => {
-    orderText += `${item.qty}x ${item.name} ($${item.price.toFixed(2)} ea) = $${(item.price * item.qty).toFixed(2)}\n`;
+    const optStr = item.option ? ` [${item.option}]` : '';
+    orderText += `${item.qty}x ${item.name}${optStr} ($${item.price.toFixed(2)} ea) = $${(item.price * item.qty).toFixed(2)}\n`;
   });
   orderText += `\nSubtotal: $${getCartSubtotal().toFixed(2)}`;
   document.getElementById('orderItemsField').value = orderText;

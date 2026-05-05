@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Stack</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #1a1a2e;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100dvh;
+    overflow: hidden;
+    font-family: 'Segoe UI', sans-serif;
+    touch-action: manipulation;
+    user-select: none;
+  }
+
+  #ui {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    z-index: 10;
+  }
+
+  #score {
+    font-size: 48px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -1px;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.4);
+  }
+
+  #best {
+    font-size: 14px;
+    color: rgba(255,255,255,0.5);
+    text-align: right;
+  }
+  #best span {
+    display: block;
+    font-size: 20px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.8);
+  }
+
+  canvas {
+    display: block;
+    cursor: pointer;
+  }
+
+  #overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(26, 26, 46, 0.92);
+    z-index: 20;
+    gap: 16px;
+    transition: opacity 0.3s;
+  }
+
+  #overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  #overlay h1 {
+    font-size: 56px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -2px;
+  }
+
+  #overlay p {
+    font-size: 16px;
+    color: rgba(255,255,255,0.55);
+    text-align: center;
+    max-width: 260px;
+    line-height: 1.6;
+  }
+
+  #overlay .final-score {
+    font-size: 80px;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1;
+    display: none;
+  }
+
+  #tap-btn {
+    margin-top: 8px;
+    padding: 16px 48px;
+    background: #fff;
+    color: #1a1a2e;
+    border: none;
+    border-radius: 50px;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: transform 0.1s, opacity 0.1s;
+  }
+
+  #tap-btn:active { transform: scale(0.96); opacity: 0.9; }
+</style>
+</head>
+<body>
+
+<div id="ui">
+  <div id="score">0</div>
+  <div id="best">BEST<span id="best-score">0</span></div>
+</div>
+
+<canvas id="c"></canvas>
+
+<div id="overlay">
+  <h1>STACK</h1>
+  <div class="final-score" id="final-score"></div>
+  <p id="overlay-msg">Tap to drop blocks.<br>Stack them perfectly to keep full width!</p>
+  <button id="tap-btn">PLAY</button>
+</div>
+
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const overlay = document.getElementById('overlay');
+const scoreEl = document.getElementById('score');
+const bestEl = document.getElementById('best-score');
+const finalScoreEl = document.getElementById('final-score');
+const overlayMsg = document.getElementById('overlay-msg');
+const tapBtn = document.getElementById('tap-btn');
+
+const BLOCK_HEIGHT = 28;
+const VISIBLE_BLOCKS = 14;
+const COLORS = [
+  '#e63946','#f4a261','#e9c46a','#2a9d8f','#457b9d',
+  '#7209b7','#3a86ff','#fb5607','#8338ec','#06d6a0',
+];
+
+let W, H, scale;
+let blocks, movingBlock, score, best, gameOver, cameraY, speed, dir;
+
+function resize() {
+  scale = window.devicePixelRatio || 1;
+  W = window.innerWidth;
+  H = window.innerHeight;
+  canvas.width = W * scale;
+  canvas.height = H * scale;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.scale(scale, scale);
+}
+
+function blockColor(i) {
+  return COLORS[i % COLORS.length];
+}
+
+function initGame() {
+  score = 0;
+  gameOver = false;
+  speed = 2.8;
+  dir = 1;
+  cameraY = 0;
+
+  const startW = Math.min(W * 0.7, 260);
+  const startX = (W - startW) / 2;
+  const groundY = H - 80;
+
+  blocks = [
+    { x: startX, y: groundY, w: startW, color: '#4a4e69' }
+  ];
+
+  spawnMoving();
+  scoreEl.textContent = '0';
+}
+
+function spawnMoving() {
+  const prev = blocks[blocks.length - 1];
+  const colorIdx = blocks.length;
+  movingBlock = {
+    x: dir > 0 ? -prev.w : W,
+    y: prev.y - BLOCK_HEIGHT,
+    w: prev.w,
+    color: blockColor(colorIdx),
+  };
+}
+
+function drop() {
+  if (gameOver) return;
+
+  const prev = blocks[blocks.length - 1];
+  const mb = movingBlock;
+
+  const left  = Math.max(mb.x, prev.x);
+  const right = Math.min(mb.x + mb.w, prev.x + prev.w);
+  const overlap = right - left;
+
+  if (overlap <= 0) {
+    endGame();
+    return;
+  }
+
+  const isPerfect = Math.abs(overlap - prev.w) < 4;
+
+  const newBlock = {
+    x: isPerfect ? prev.x : left,
+    w: isPerfect ? prev.w : overlap,
+    y: mb.y,
+    color: mb.color,
+  };
+
+  if (isPerfect) flashPerfect(newBlock);
+
+  blocks.push(newBlock);
+  score++;
+  scoreEl.textContent = score;
+
+  if (score > best) {
+    best = score;
+    bestEl.textContent = best;
+    localStorage.setItem('stack-best', best);
+  }
+
+  speed = Math.min(2.8 + score * 0.12, 9);
+  dir *= -1;
+
+  const stackTop = newBlock.y;
+  const targetCamera = stackTop - H * 0.55;
+  if (targetCamera < cameraY) cameraY = targetCamera;
+
+  if (overlap < prev.w * 0.12) {
+    endGame();
+    return;
+  }
+
+  spawnMoving();
+}
+
+let perfectFlash = null;
+function flashPerfect(block) {
+  perfectFlash = { block, alpha: 1, text: 'PERFECT!', timer: 60 };
+}
+
+function endGame() {
+  gameOver = true;
+  finalScoreEl.style.display = 'block';
+  finalScoreEl.textContent = score;
+  overlayMsg.textContent = score > 0
+    ? `You stacked ${score} block${score === 1 ? '' : 's'}.`
+    : 'Try to overlap the blocks!';
+  tapBtn.textContent = 'PLAY AGAIN';
+  overlay.classList.remove('hidden');
+}
+
+function startGame() {
+  overlay.classList.add('hidden');
+  finalScoreEl.style.display = 'none';
+  overlayMsg.textContent = 'Tap to drop blocks.\nStack them perfectly to keep full width!';
+  tapBtn.textContent = 'PLAY';
+  initGame();
+}
+
+function lerp(a, b, t) { return a + (b - a) * t; }
+
+let animCameraY = 0;
+let raf;
+
+function loop() {
+  raf = requestAnimationFrame(loop);
+
+  animCameraY = lerp(animCameraY, cameraY, 0.1);
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Background gradient
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, '#16213e');
+  grad.addColorStop(1, '#0f3460');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+
+  const offsetY = -animCameraY;
+
+  // Draw blocks
+  for (let i = 0; i < blocks.length; i++) {
+    const b = blocks[i];
+    const y = b.y + offsetY;
+    if (y > H + 10 || y < -BLOCK_HEIGHT - 10) continue;
+
+    // Shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.18)';
+    ctx.fillRect(b.x + 4, y + 4, b.w, BLOCK_HEIGHT);
+
+    // Block
+    ctx.fillStyle = b.color;
+    ctx.beginPath();
+    roundRect(ctx, b.x, y, b.w, BLOCK_HEIGHT, 4);
+    ctx.fill();
+
+    // Shine
+    ctx.fillStyle = 'rgba(255,255,255,0.12)';
+    ctx.beginPath();
+    roundRect(ctx, b.x, y, b.w, BLOCK_HEIGHT / 2, 4);
+    ctx.fill();
+  }
+
+  // Moving block
+  if (movingBlock && !gameOver) {
+    movingBlock.x += speed * dir;
+    if (movingBlock.x + movingBlock.w > W + movingBlock.w) {
+      movingBlock.x = -movingBlock.w;
+    } else if (movingBlock.x < -movingBlock.w) {
+      movingBlock.x = W;
+    }
+
+    const mb = movingBlock;
+    const y = mb.y + offsetY;
+
+    ctx.fillStyle = 'rgba(0,0,0,0.18)';
+    ctx.fillRect(mb.x + 4, y + 4, mb.w, BLOCK_HEIGHT);
+
+    ctx.fillStyle = mb.color;
+    ctx.beginPath();
+    roundRect(ctx, mb.x, y, mb.w, BLOCK_HEIGHT, 4);
+    ctx.fill();
+
+    ctx.fillStyle = 'rgba(255,255,255,0.12)';
+    ctx.beginPath();
+    roundRect(ctx, mb.x, y, mb.w, BLOCK_HEIGHT / 2, 4);
+    ctx.fill();
+  }
+
+  // Perfect flash
+  if (perfectFlash) {
+    perfectFlash.timer--;
+    perfectFlash.alpha = perfectFlash.timer / 60;
+    const b = perfectFlash.block;
+    ctx.save();
+    ctx.globalAlpha = perfectFlash.alpha;
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 22px Segoe UI';
+    ctx.textAlign = 'center';
+    ctx.fillText('PERFECT!', b.x + b.w / 2, b.y + offsetY - 10);
+    ctx.restore();
+    if (perfectFlash.timer <= 0) perfectFlash = null;
+  }
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  if (w < 2 * r) r = w / 2;
+  if (h < 2 * r) r = h / 2;
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+// Input
+canvas.addEventListener('pointerdown', (e) => { e.preventDefault(); if (!gameOver) drop(); });
+tapBtn.addEventListener('click', startGame);
+document.addEventListener('keydown', (e) => {
+  if (e.code === 'Space' || e.code === 'Enter') {
+    if (!overlay.classList.contains('hidden')) startGame();
+    else drop();
+  }
+});
+
+// Init
+best = parseInt(localStorage.getItem('stack-best') || '0');
+bestEl.textContent = best;
+resize();
+window.addEventListener('resize', () => { resize(); });
+loop();
+</script>
+</body>
+</html>

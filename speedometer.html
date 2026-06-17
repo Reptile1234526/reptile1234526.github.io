@@ -478,6 +478,68 @@
     }
 
     .summary-item { text-align: center; }
+
+    /* GPS banner */
+    .gps-banner {
+      width: 100%;
+      background: rgba(0,245,255,0.06);
+      border: 1px solid rgba(0,245,255,0.25);
+      border-radius: 8px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+
+    .gps-banner:hover {
+      background: rgba(0,245,255,0.1);
+      box-shadow: 0 0 16px rgba(0,245,255,0.2);
+    }
+
+    .gps-banner-text {
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      color: rgba(0,245,255,0.7);
+      line-height: 1.5;
+    }
+
+    .gps-banner-text strong {
+      display: block;
+      color: #00f5ff;
+      font-size: 12px;
+      letter-spacing: 2px;
+    }
+
+    .gps-banner-btn {
+      flex-shrink: 0;
+      padding: 7px 14px;
+      border: 1px solid rgba(0,245,255,0.5);
+      border-radius: 5px;
+      background: rgba(0,245,255,0.1);
+      color: #00f5ff;
+      font-family: 'Courier New', monospace;
+      font-size: 10px;
+      letter-spacing: 2px;
+      cursor: pointer;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .gps-denied {
+      border-color: rgba(255,170,0,0.3);
+      background: rgba(255,170,0,0.05);
+    }
+
+    .gps-denied .gps-banner-text { color: rgba(255,170,0,0.6); }
+    .gps-denied .gps-banner-text strong { color: #ffaa00; }
+    .gps-denied .gps-banner-btn {
+      border-color: rgba(255,170,0,0.4);
+      background: rgba(255,170,0,0.08);
+      color: #ffaa00;
+    }
   </style>
 </head>
 <body>
@@ -486,10 +548,19 @@
   <header>
     <div class="logo">Speedo&nbsp;&bull;&nbsp;GPS</div>
     <div style="display:flex;gap:8px;align-items:center;font-size:10px;color:rgba(0,245,255,0.4);letter-spacing:2px;">
-      <span id="gps-status-text">LOCATING</span>
+      <span id="gps-status-text">DEMO</span>
       <div class="status-dot" id="status-dot"></div>
     </div>
   </header>
+
+  <!-- GPS activation banner -->
+  <div class="gps-banner" id="gps-banner" onclick="activateGPS()">
+    <div class="gps-banner-text">
+      <strong>DEMO MODE</strong>
+      Tap to use real GPS speed
+    </div>
+    <button class="gps-banner-btn" id="gps-banner-btn">Enable GPS</button>
+  </div>
 
   <!-- Speedometer -->
   <div class="speedometer-wrap">
@@ -599,11 +670,6 @@
     </div>
   </div>
 
-  <!-- GPS notice -->
-  <div class="gps-notice" id="gps-notice">
-    GPS access needed for live data<br/>
-    <button class="btn" onclick="requestGPS()">Enable GPS</button>
-  </div>
 
 </div>
 
@@ -688,7 +754,6 @@
   buildHistoryBars();
   renderAll();
   startDemo();        // always start demo immediately
-  tryRealGPS();       // attempt to upgrade to real GPS in background
 
   function resizeMap() {
     const container = mapCanvas.parentElement;
@@ -708,30 +773,35 @@
   }
 
   // ── GPS ────────────────────────────────────────────────────────────────
-  function tryRealGPS() {
-    if (!navigator.geolocation) return;
+  function activateGPS() {
+    if (!navigator.geolocation) {
+      setBannerDenied('GPS not supported by this browser');
+      return;
+    }
+    const banner = document.getElementById('gps-banner');
+    const btn    = document.getElementById('gps-banner-btn');
+    banner.classList.remove('gps-denied');
+    btn.textContent = 'Requesting…';
+
+    // Clear any existing watch
+    if (watchId != null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
+
     watchId = navigator.geolocation.watchPosition(onPosition, onGPSError, {
       enableHighAccuracy: true,
       maximumAge: 0,
-      timeout: 15000
+      timeout: 20000
     });
   }
-
-  // Exposed so the "Enable GPS" button works after a permission denial
-  function requestGPS() {
-    if (watchId != null) return;
-    document.getElementById('gps-notice').style.display = 'none';
-    tryRealGPS();
-  }
-  window.requestGPS = requestGPS;
+  window.activateGPS = activateGPS;
+  window.requestGPS  = activateGPS; // keep old name working
 
   function onPosition(pos) {
-    // Switch off demo the first time real GPS fires
+    // First real fix — kill demo
     if (usingDemo) {
       usingDemo = false;
       if (demoInterval) { clearInterval(demoInterval); demoInterval = null; }
-      document.getElementById('gps-status-text').textContent = 'ACTIVE';
-      document.getElementById('gps-notice').style.display = 'none';
+      document.getElementById('gps-status-text').textContent = 'GPS';
+      document.getElementById('gps-banner').style.display = 'none';
     }
 
     const { latitude, longitude, speed: spd, heading: hdg, altitude: alt, accuracy: acc } = pos.coords;
@@ -752,10 +822,21 @@
   }
 
   function onGPSError(err) {
-    if (err.code === 1) {
-      document.getElementById('gps-notice').style.display = 'block';
-    }
-    // Demo is already running — nothing else needed
+    const messages = {
+      1: 'Permission denied — enable location in browser settings',
+      2: 'Position unavailable — check GPS signal',
+      3: 'GPS timed out — tap to retry'
+    };
+    setBannerDenied(messages[err.code] || 'GPS error — tap to retry');
+  }
+
+  function setBannerDenied(msg) {
+    const banner = document.getElementById('gps-banner');
+    const btn    = document.getElementById('gps-banner-btn');
+    banner.classList.add('gps-denied');
+    banner.querySelector('.gps-banner-text strong').textContent = 'GPS UNAVAILABLE';
+    banner.querySelector('.gps-banner-text').lastChild.textContent = msg;
+    btn.textContent = 'Retry';
   }
 
   function startDemo() {
@@ -764,9 +845,8 @@
     demoLat = 37.7749; demoLng = -122.4194;
     lat = demoLat; lng = demoLng;
     mapTrack = [[demoLat, demoLng]];
-    document.getElementById('gps-status-text').textContent = 'DEMO';
     document.getElementById('alt-val').textContent = '42';
-    document.getElementById('accuracy-display').textContent = 'DEMO MODE';
+    document.getElementById('accuracy-display').textContent = 'DEMO';
     document.getElementById('coords-display').textContent =
       demoLat.toFixed(5) + '°  ' + demoLng.toFixed(5) + '°';
     demoInterval = setInterval(demoTick_, 500);

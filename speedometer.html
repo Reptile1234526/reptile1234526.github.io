@@ -610,21 +610,24 @@
 <script>
 (function() {
   // ── State ──────────────────────────────────────────────────────────────
-  let speed = 0, maxSpeed = 0, avgSpeed = 0, distance = 0;
-  let heading = 0, altitude = null, accuracy = null;
+  let speed = 0, displaySpeed = 0;
+  let maxSpeed = 0, avgSpeed = 0, distance = 0;
+  let heading = 0, displayHeading = 0;
+  let altitude = null, accuracy = null;
   let lat = null, lng = null;
   let tripStart = null, tripEnd = null, elapsed = 0;
   let speedSum = 0, speedCount = 0;
-  let prevPos = null;
-  let trackPoints = [];
+  let mapTrack = [];     // always-on track for map display
+  let tripTrack = [];    // track only during active trip
   let historyData = Array(32).fill(0);
   let watchId = null;
-  let usingDemo = false;
+  let usingDemo = true;
   let tripActive = false;
+  let demoInterval = null;
 
   // Demo simulation state
   let demoSpeed = 0, demoHeading = 45, demoLat = 37.7749, demoLng = -122.4194;
-  let demoDir = 1, demoTick = 0;
+  let demoDir = 1, demoCounter = 0;
 
   // ── Canvas refs ────────────────────────────────────────────────────────
   const speedoCanvas = document.getElementById('speedo-canvas');
@@ -654,7 +657,7 @@
     speedSum = 0;
     speedCount = 0;
     avgSpeed = 0;
-    trackPoints = [];
+    tripTrack = [];
     historyData = Array(32).fill(0);
     buildHistoryBars();
     document.getElementById('trip-summary').style.display = 'none';
@@ -684,7 +687,8 @@
   window.addEventListener('resize', resizeMap);
   buildHistoryBars();
   renderAll();
-  requestGPS();
+  startDemo();        // always start demo immediately
+  tryRealGPS();       // attempt to upgrade to real GPS in background
 
   function resizeMap() {
     const container = mapCanvas.parentElement;
@@ -704,37 +708,45 @@
   }
 
   // ── GPS ────────────────────────────────────────────────────────────────
-  function requestGPS() {
-    if (!navigator.geolocation) { startDemo(); return; }
-    document.getElementById('gps-notice').style.display = 'none';
+  function tryRealGPS() {
+    if (!navigator.geolocation) return;
     watchId = navigator.geolocation.watchPosition(onPosition, onGPSError, {
       enableHighAccuracy: true,
-      maximumAge: 500,
-      timeout: 10000
+      maximumAge: 0,
+      timeout: 15000
     });
+  }
+
+  // Exposed so the "Enable GPS" button works after a permission denial
+  function requestGPS() {
+    if (watchId != null) return;
+    document.getElementById('gps-notice').style.display = 'none';
+    tryRealGPS();
   }
   window.requestGPS = requestGPS;
 
   function onPosition(pos) {
-    usingDemo = false;
-    const { latitude, longitude, speed: spd, heading: hdg, altitude: alt, accuracy: acc } = pos.coords;
+    // Switch off demo the first time real GPS fires
+    if (usingDemo) {
+      usingDemo = false;
+      if (demoInterval) { clearInterval(demoInterval); demoInterval = null; }
+      document.getElementById('gps-status-text').textContent = 'ACTIVE';
+      document.getElementById('gps-notice').style.display = 'none';
+    }
 
+    const { latitude, longitude, speed: spd, heading: hdg, altitude: alt, accuracy: acc } = pos.coords;
     const newSpeed = spd != null ? spd * 3.6 : 0;
     speed = newSpeed;
-
     if (hdg != null) heading = hdg;
     altitude = alt;
     accuracy = acc;
 
-    if (tripActive) {
-      updateTripStats(newSpeed, latitude, longitude);
-    }
+    pushMapPoint(latitude, longitude);
+    if (tripActive) recordTripPoint(newSpeed, latitude, longitude);
 
     lat = latitude; lng = longitude;
-
-    document.getElementById('gps-status-text').textContent = 'ACTIVE';
     document.getElementById('coords-display').textContent =
-      lat.toFixed(5) + '° &nbsp;' + lng.toFixed(5) + '°';
+      lat.toFixed(5) + '°  ' + lng.toFixed(5) + '°';
     document.getElementById('accuracy-display').textContent = '±' + Math.round(acc) + ' m';
     if (alt != null) document.getElementById('alt-val').textContent = Math.round(alt);
   }
@@ -743,58 +755,67 @@
     if (err.code === 1) {
       document.getElementById('gps-notice').style.display = 'block';
     }
-    if (!usingDemo) startDemo();
+    // Demo is already running — nothing else needed
   }
 
   function startDemo() {
+    if (demoInterval) return;
     usingDemo = true;
     demoLat = 37.7749; demoLng = -122.4194;
     lat = demoLat; lng = demoLng;
+    mapTrack = [[demoLat, demoLng]];
     document.getElementById('gps-status-text').textContent = 'DEMO';
     document.getElementById('alt-val').textContent = '42';
-    document.getElementById('accuracy-display').textContent = '±5 m';
-    setInterval(demoTick_, 1000);
+    document.getElementById('accuracy-display').textContent = 'DEMO MODE';
+    document.getElementById('coords-display').textContent =
+      demoLat.toFixed(5) + '°  ' + demoLng.toFixed(5) + '°';
+    demoInterval = setInterval(demoTick_, 500);
   }
 
   function demoTick_() {
-    demoTick++;
-    demoSpeed += (Math.random() - 0.45) * 8 * demoDir;
-    if (demoSpeed > 110) demoDir = -1;
-    if (demoSpeed < 0) { demoSpeed = 0; demoDir = 1; }
+    demoCounter++;
+    // Smooth speed ramp: gentle sine-based variation
+    demoSpeed += (Math.random() - 0.42) * 10 * demoDir;
+    if (demoSpeed > 115) demoDir = -1;
+    if (demoSpeed < 2)   { demoSpeed = 2; demoDir = 1; }
     demoSpeed = Math.max(0, Math.min(130, demoSpeed));
 
-    demoHeading = (demoHeading + (Math.random() - 0.5) * 5 + 360) % 360;
+    demoHeading = (demoHeading + (Math.random() - 0.5) * 8 + 360) % 360;
 
-    const rad = demoHeading * Math.PI / 180;
-    const step = demoSpeed / 3600 / 111;
+    const rad = (demoHeading - 90) * Math.PI / 180;
+    const step = (demoSpeed * 0.5) / 3600 / 111;
     demoLat += Math.cos(rad) * step;
     demoLng += Math.sin(rad) * step;
 
+    speed   = demoSpeed;
     heading = demoHeading;
-    speed = demoSpeed;
+    lat     = demoLat;
+    lng     = demoLng;
 
-    if (tripActive) {
-      updateTripStats(demoSpeed, demoLat, demoLng);
-    }
+    pushMapPoint(demoLat, demoLng);
+    if (tripActive) recordTripPoint(demoSpeed, demoLat, demoLng);
 
-    lat = demoLat; lng = demoLng;
-
-    document.getElementById('coords-display').innerHTML =
-      lat.toFixed(5) + '° &nbsp;' + lng.toFixed(5) + '°';
+    document.getElementById('coords-display').textContent =
+      lat.toFixed(5) + '°  ' + lng.toFixed(5) + '°';
   }
 
-  // ── Trip stat accumulation (only when tripActive) ──────────────────────
-  function updateTripStats(spd, newLat, newLng) {
+  // ── Track helpers ──────────────────────────────────────────────────────
+  function pushMapPoint(la, lo) {
+    mapTrack.push([la, lo]);
+    if (mapTrack.length > 500) mapTrack.shift();
+  }
+
+  function recordTripPoint(spd, la, lo) {
     if (spd > maxSpeed) maxSpeed = spd;
     speedSum += spd; speedCount++;
     avgSpeed = speedSum / speedCount;
 
-    if (trackPoints.length > 0) {
-      const prev = trackPoints[trackPoints.length - 1];
-      distance += haversine(prev[0], prev[1], newLat, newLng);
+    if (tripTrack.length > 0) {
+      const prev = tripTrack[tripTrack.length - 1];
+      distance += haversine(prev[0], prev[1], la, lo);
     }
-    trackPoints.push([newLat, newLng]);
-    if (trackPoints.length > 500) trackPoints.shift();
+    tripTrack.push([la, lo]);
+    if (tripTrack.length > 500) tripTrack.shift();
 
     historyData.push(Math.round(spd));
     historyData.shift();
@@ -802,6 +823,11 @@
 
   // ── Main loop ──────────────────────────────────────────────────────────
   function renderAll() {
+    // Smooth interpolation toward target values
+    displaySpeed += (speed - displaySpeed) * 0.07;
+    displayHeading += angleDiff(heading, displayHeading) * 0.1;
+    displayHeading = (displayHeading + 360) % 360;
+
     if (tripActive && tripStart !== null) {
       elapsed = Math.floor((Date.now() - tripStart) / 1000);
     }
@@ -811,6 +837,13 @@
     drawCompass();
     updateHistoryBars();
     requestAnimationFrame(renderAll);
+  }
+
+  function angleDiff(target, current) {
+    let d = target - current;
+    while (d > 180)  d -= 360;
+    while (d < -180) d += 360;
+    return d;
   }
 
   function updateDOM() {
@@ -836,7 +869,7 @@
     const startAngle = Math.PI * 0.75;
     const endAngle   = Math.PI * 2.25;
     const maxKmh     = 200;
-    const fraction   = Math.min(speed / maxKmh, 1);
+    const fraction   = Math.min(displaySpeed / maxKmh, 1);
     const needleAngle = startAngle + fraction * (endAngle - startAngle);
 
     // Outer glow ring
@@ -960,8 +993,7 @@
       mc.beginPath(); mc.moveTo(0, y); mc.lineTo(W, y); mc.stroke();
     }
 
-    if (trackPoints.length < 2 || lat === null) {
-      // No track yet — show waiting indicator
+    if (lat === null) {
       mc.fillStyle = 'rgba(0,245,255,0.2)';
       mc.font = '11px Courier New';
       mc.textAlign = 'center';
@@ -970,16 +1002,22 @@
       return;
     }
 
+    // Use mapTrack for display; fall back to just current position
+    const pts = mapTrack.length > 1 ? mapTrack : [[lat, lng]];
+
     // Find bounding box
     let minLat = Infinity, maxLat = -Infinity, minLng = Infinity, maxLng = -Infinity;
-    trackPoints.forEach(([la, lo]) => {
+    pts.forEach(([la, lo]) => {
       if (la < minLat) minLat = la; if (la > maxLat) maxLat = la;
       if (lo < minLng) minLng = lo; if (lo > maxLng) maxLng = lo;
     });
+    // Also include current position
+    if (lat < minLat) minLat = lat; if (lat > maxLat) maxLat = lat;
+    if (lng < minLng) minLng = lng; if (lng > maxLng) maxLng = lng;
 
-    const pad = 20;
-    const spanLat = maxLat - minLat || 0.001;
-    const spanLng = maxLng - minLng || 0.001;
+    const pad = 30;
+    const spanLat = maxLat - minLat || 0.002;
+    const spanLng = maxLng - minLng || 0.002;
     const scaleX = (W - pad * 2) / spanLng;
     const scaleY = (H - pad * 2) / spanLat;
     const scale  = Math.min(scaleX, scaleY);
@@ -991,26 +1029,26 @@
       ];
     }
 
-    // Track line with gradient fade
-    mc.beginPath();
-    trackPoints.forEach(([la, lo], i) => {
-      const [x, y] = toCanvas([la, lo]);
-      i === 0 ? mc.moveTo(x, y) : mc.lineTo(x, y);
-    });
-    mc.strokeStyle = 'rgba(0,245,255,0.25)';
-    mc.lineWidth = 2;
-    mc.lineJoin = 'round';
-    mc.stroke();
+    // Track line
+    if (pts.length > 1) {
+      mc.beginPath();
+      pts.forEach(([la, lo], i) => {
+        const [x, y] = toCanvas([la, lo]);
+        i === 0 ? mc.moveTo(x, y) : mc.lineTo(x, y);
+      });
+      mc.strokeStyle = 'rgba(0,245,255,0.22)';
+      mc.lineWidth = 2;
+      mc.lineJoin = 'round';
+      mc.stroke();
 
-    // Recent portion brighter
-    if (trackPoints.length > 10) {
-      const recent = trackPoints.slice(-20);
+      // Recent portion brighter
+      const recent = pts.slice(-25);
       mc.beginPath();
       recent.forEach(([la, lo], i) => {
         const [x, y] = toCanvas([la, lo]);
         i === 0 ? mc.moveTo(x, y) : mc.lineTo(x, y);
       });
-      mc.strokeStyle = 'rgba(0,245,255,0.7)';
+      mc.strokeStyle = 'rgba(0,245,255,0.65)';
       mc.lineWidth = 2.5;
       mc.stroke();
     }
@@ -1071,7 +1109,7 @@
     // Needle
     cc.save();
     cc.translate(cx, cy);
-    cc.rotate(heading * Math.PI / 180);
+    cc.rotate(displayHeading * Math.PI / 180);
 
     cc.beginPath();
     cc.moveTo(0, -R + 6);

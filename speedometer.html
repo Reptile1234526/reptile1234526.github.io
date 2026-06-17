@@ -773,29 +773,54 @@
   }
 
   // ── GPS ────────────────────────────────────────────────────────────────
+  let lastGPSPos = null, lastGPSTime = null;
+
   function activateGPS() {
     if (!navigator.geolocation) {
-      setBannerDenied('GPS not supported by this browser');
+      setBannerDenied('Location not supported by this browser');
       return;
     }
-    const banner = document.getElementById('gps-banner');
-    const btn    = document.getElementById('gps-banner-btn');
-    banner.classList.remove('gps-denied');
-    btn.textContent = 'Requesting…';
-
-    // Clear any existing watch
     if (watchId != null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
 
-    watchId = navigator.geolocation.watchPosition(onPosition, onGPSError, {
-      enableHighAccuracy: true,
-      maximumAge: 0,
-      timeout: 20000
-    });
+    setBannerState('Locating…', false);
+
+    // Step 1: fast low-accuracy fix to confirm permission and get initial position quickly
+    navigator.geolocation.getCurrentPosition(
+      function(pos) {
+        onPosition(pos);
+        setBannerState('GPS active', false);
+        // Step 2: now start high-accuracy watch for speed tracking
+        watchId = navigator.geolocation.watchPosition(onPosition, onGPSError, {
+          enableHighAccuracy: true,
+          maximumAge: 1000,
+          timeout: 10000
+        });
+      },
+      onGPSError,
+      { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 }
+    );
   }
   window.activateGPS = activateGPS;
-  window.requestGPS  = activateGPS; // keep old name working
+  window.requestGPS  = activateGPS;
 
   function onPosition(pos) {
+    const { latitude, longitude, speed: spd, heading: hdg, altitude: alt, accuracy: acc } = pos.coords;
+    const now = pos.timestamp;
+
+    // Calculate speed from position delta if device doesn't report it
+    let newSpeed = 0;
+    if (spd != null && spd >= 0) {
+      newSpeed = spd * 3.6;
+    } else if (lastGPSPos && lastGPSTime) {
+      const dt = (now - lastGPSTime) / 1000;
+      if (dt > 0.5 && dt < 30) {
+        const d = haversine(lastGPSPos[0], lastGPSPos[1], latitude, longitude);
+        newSpeed = (d / dt) * 3600;
+      }
+    }
+    lastGPSPos  = [latitude, longitude];
+    lastGPSTime = now;
+
     // First real fix — kill demo
     if (usingDemo) {
       usingDemo = false;
@@ -804,8 +829,6 @@
       document.getElementById('gps-banner').style.display = 'none';
     }
 
-    const { latitude, longitude, speed: spd, heading: hdg, altitude: alt, accuracy: acc } = pos.coords;
-    const newSpeed = spd != null ? spd * 3.6 : 0;
     speed = newSpeed;
     if (hdg != null) heading = hdg;
     altitude = alt;
@@ -823,20 +846,26 @@
 
   function onGPSError(err) {
     const messages = {
-      1: 'Permission denied — enable location in browser settings',
-      2: 'Position unavailable — check GPS signal',
-      3: 'GPS timed out — tap to retry'
+      1: 'Permission denied — allow location in browser settings',
+      2: 'Signal unavailable — go outside and retry',
+      3: 'Timed out — tap to retry'
     };
     setBannerDenied(messages[err.code] || 'GPS error — tap to retry');
   }
 
-  function setBannerDenied(msg) {
+  function setBannerState(label, denied) {
     const banner = document.getElementById('gps-banner');
     const btn    = document.getElementById('gps-banner-btn');
+    banner.classList.toggle('gps-denied', denied);
+    btn.textContent = label;
+  }
+
+  function setBannerDenied(msg) {
+    const banner = document.getElementById('gps-banner');
     banner.classList.add('gps-denied');
     banner.querySelector('.gps-banner-text strong').textContent = 'GPS UNAVAILABLE';
-    banner.querySelector('.gps-banner-text').lastChild.textContent = msg;
-    btn.textContent = 'Retry';
+    banner.querySelector('.gps-banner-text').childNodes[2].textContent = msg;
+    document.getElementById('gps-banner-btn').textContent = 'Retry';
   }
 
   function startDemo() {

@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Speedometer & GPS</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #000;
+      color: #00f5ff;
+      font-family: 'Courier New', monospace;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Animated grid background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        linear-gradient(rgba(0,245,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,245,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      animation: gridScroll 8s linear infinite;
+      z-index: 0;
+    }
+
+    @keyframes gridScroll {
+      0% { background-position: 0 0; }
+      100% { background-position: 40px 40px; }
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 20px 16px 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    /* Header */
+    header {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      font-size: 11px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: rgba(0,245,255,0.5);
+    }
+
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #00f5ff;
+      box-shadow: 0 0 8px #00f5ff;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.7); }
+    }
+
+    /* Speedometer */
+    .speedometer-wrap {
+      position: relative;
+      width: 300px;
+      height: 300px;
+    }
+
+    .speedometer-canvas {
+      width: 300px;
+      height: 300px;
+    }
+
+    .speed-display {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -45%);
+      text-align: center;
+    }
+
+    .speed-value {
+      font-size: 72px;
+      font-weight: 700;
+      line-height: 1;
+      color: #fff;
+      text-shadow: 0 0 20px #00f5ff, 0 0 40px rgba(0,245,255,0.4);
+      letter-spacing: -2px;
+    }
+
+    .speed-unit {
+      font-size: 11px;
+      letter-spacing: 4px;
+      color: rgba(0,245,255,0.6);
+      margin-top: 4px;
+    }
+
+    .max-speed {
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: rgba(0,245,255,0.35);
+      margin-top: 6px;
+    }
+
+    /* Stats row */
+    .stats {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+    }
+
+    .stat-card {
+      background: rgba(0,245,255,0.04);
+      border: 1px solid rgba(0,245,255,0.12);
+      border-radius: 8px;
+      padding: 12px 10px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0,245,255,0.4), transparent);
+    }
+
+    .stat-label {
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: rgba(0,245,255,0.4);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .stat-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: #00f5ff;
+      text-shadow: 0 0 10px rgba(0,245,255,0.5);
+    }
+
+    .stat-sub {
+      font-size: 9px;
+      color: rgba(0,245,255,0.35);
+      margin-top: 2px;
+    }
+
+    /* GPS Map */
+    .map-section {
+      width: 100%;
+    }
+
+    .section-label {
+      font-size: 9px;
+      letter-spacing: 3px;
+      color: rgba(0,245,255,0.4);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(0,245,255,0.15);
+    }
+
+    .map-container {
+      width: 100%;
+      height: 220px;
+      border: 1px solid rgba(0,245,255,0.15);
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+      background: #000810;
+    }
+
+    #map-canvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    .map-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      border-radius: 10px;
+      box-shadow: inset 0 0 40px rgba(0,0,0,0.6);
+    }
+
+    .map-coords {
+      position: absolute;
+      bottom: 10px;
+      left: 12px;
+      font-size: 10px;
+      color: rgba(0,245,255,0.5);
+      letter-spacing: 1px;
+    }
+
+    .map-accuracy {
+      position: absolute;
+      bottom: 10px;
+      right: 12px;
+      font-size: 10px;
+      color: rgba(0,245,255,0.35);
+    }
+
+    /* Heading compass */
+    .compass-row {
+      width: 100%;
+      display: flex;
+      gap: 10px;
+    }
+
+    .compass-card {
+      flex: 1;
+      background: rgba(0,245,255,0.04);
+      border: 1px solid rgba(0,245,255,0.12);
+      border-radius: 8px;
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .compass-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0,245,255,0.4), transparent);
+    }
+
+    .compass-ring {
+      width: 52px;
+      height: 52px;
+      flex-shrink: 0;
+    }
+
+    .compass-info { flex: 1; }
+
+    .compass-direction {
+      font-size: 28px;
+      font-weight: 700;
+      color: #fff;
+      text-shadow: 0 0 15px rgba(0,245,255,0.6);
+      line-height: 1;
+    }
+
+    .compass-deg {
+      font-size: 11px;
+      color: rgba(0,245,255,0.5);
+      margin-top: 4px;
+    }
+
+    .altitude-card {
+      width: 110px;
+      background: rgba(0,245,255,0.04);
+      border: 1px solid rgba(0,245,255,0.12);
+      border-radius: 8px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .altitude-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0,245,255,0.4), transparent);
+    }
+
+    /* Trip info */
+    .trip-card {
+      width: 100%;
+      background: rgba(0,245,255,0.04);
+      border: 1px solid rgba(0,245,255,0.12);
+      border-radius: 8px;
+      padding: 16px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .trip-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0,245,255,0.4), transparent);
+    }
+
+    .trip-item { text-align: center; }
+
+    /* GPS permission notice */
+    .gps-notice {
+      width: 100%;
+      background: rgba(255,170,0,0.05);
+      border: 1px solid rgba(255,170,0,0.2);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 11px;
+      color: rgba(255,170,0,0.7);
+      text-align: center;
+      letter-spacing: 1px;
+      display: none;
+    }
+
+    .btn {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 6px 20px;
+      border: 1px solid rgba(0,245,255,0.4);
+      border-radius: 4px;
+      background: transparent;
+      color: #00f5ff;
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      letter-spacing: 2px;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      background: rgba(0,245,255,0.1);
+      box-shadow: 0 0 12px rgba(0,245,255,0.3);
+    }
+
+    /* Speed bar graph */
+    .speed-history {
+      width: 100%;
+    }
+
+    .history-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      height: 50px;
+      padding: 0 2px;
+    }
+
+    .history-bar {
+      flex: 1;
+      background: rgba(0,245,255,0.15);
+      border-radius: 2px 2px 0 0;
+      transition: height 0.4s ease;
+      min-height: 2px;
+    }
+
+    .history-bar.current {
+      background: rgba(0,245,255,0.7);
+      box-shadow: 0 0 6px rgba(0,245,255,0.4);
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div class="logo">Speedo&nbsp;&bull;&nbsp;GPS</div>
+    <div style="display:flex;gap:8px;align-items:center;font-size:10px;color:rgba(0,245,255,0.4);letter-spacing:2px;">
+      <span id="gps-status-text">LOCATING</span>
+      <div class="status-dot" id="status-dot"></div>
+    </div>
+  </header>
+
+  <!-- Speedometer -->
+  <div class="speedometer-wrap">
+    <canvas class="speedometer-canvas" id="speedo-canvas" width="300" height="300"></canvas>
+    <div class="speed-display">
+      <div class="speed-value" id="speed-val">0</div>
+      <div class="speed-unit">KM/H</div>
+      <div class="max-speed">MAX&nbsp;<span id="max-val">0</span></div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-label">Avg</div>
+      <div class="stat-value" id="avg-val">0</div>
+      <div class="stat-sub">km/h</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Distance</div>
+      <div class="stat-value" id="dist-val">0.0</div>
+      <div class="stat-sub">km</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Time</div>
+      <div class="stat-value" id="time-val">0:00</div>
+      <div class="stat-sub">elapsed</div>
+    </div>
+  </div>
+
+  <!-- Speed history bars -->
+  <div class="speed-history">
+    <div class="section-label">Speed History</div>
+    <div class="history-bars" id="history-bars"></div>
+  </div>
+
+  <!-- GPS Map -->
+  <div class="map-section">
+    <div class="section-label">GPS Track</div>
+    <div class="map-container">
+      <canvas id="map-canvas"></canvas>
+      <div class="map-overlay"></div>
+      <div class="map-coords" id="coords-display">--°N &nbsp;--°E</div>
+      <div class="map-accuracy" id="accuracy-display">±-- m</div>
+    </div>
+  </div>
+
+  <!-- Compass + Altitude -->
+  <div class="compass-row">
+    <div class="compass-card">
+      <canvas class="compass-ring" id="compass-canvas" width="52" height="52"></canvas>
+      <div class="compass-info">
+        <div class="compass-direction" id="heading-dir">--</div>
+        <div class="compass-deg" id="heading-deg">--- °</div>
+      </div>
+    </div>
+    <div class="altitude-card">
+      <div class="stat-label">Altitude</div>
+      <div class="stat-value" id="alt-val">--</div>
+      <div class="stat-sub">meters</div>
+    </div>
+  </div>
+
+  <!-- Trip -->
+  <div class="trip-card">
+    <div class="trip-item">
+      <div class="stat-label">Trip Start</div>
+      <div class="stat-value" style="font-size:14px;" id="trip-start">--:--</div>
+    </div>
+    <div class="trip-item">
+      <div class="stat-label">Satellites</div>
+      <div class="stat-value" style="font-size:14px;" id="sat-val">--</div>
+    </div>
+  </div>
+
+  <!-- GPS notice -->
+  <div class="gps-notice" id="gps-notice">
+    GPS access needed for live data<br/>
+    <button class="btn" onclick="requestGPS()">Enable GPS</button>
+  </div>
+
+</div>
+
+<script>
+(function() {
+  // ── State ──────────────────────────────────────────────────────────────
+  let speed = 0, maxSpeed = 0, avgSpeed = 0, distance = 0;
+  let heading = 0, altitude = null, accuracy = null;
+  let lat = null, lng = null;
+  let tripStart = null, elapsed = 0;
+  let speedSamples = [], speedSum = 0, speedCount = 0;
+  let prevPos = null;
+  let trackPoints = [];
+  let historyData = Array(32).fill(0);
+  let watchId = null;
+  let usingDemo = false;
+
+  // Demo simulation state
+  let demoSpeed = 0, demoHeading = 45, demoLat = 37.7749, demoLng = -122.4194;
+  let demoDir = 1, demoTick = 0;
+
+  // ── Canvas refs ────────────────────────────────────────────────────────
+  const speedoCanvas = document.getElementById('speedo-canvas');
+  const sc = speedoCanvas.getContext('2d');
+  const mapCanvas = document.getElementById('map-canvas');
+  const mc = mapCanvas.getContext('2d');
+  const compassCanvas = document.getElementById('compass-canvas');
+  const cc = compassCanvas.getContext('2d');
+
+  // ── Init ───────────────────────────────────────────────────────────────
+  resizeMap();
+  window.addEventListener('resize', resizeMap);
+  buildHistoryBars();
+  renderAll();
+  requestGPS();
+
+  function resizeMap() {
+    const container = mapCanvas.parentElement;
+    mapCanvas.width = container.clientWidth;
+    mapCanvas.height = container.clientHeight;
+  }
+
+  function buildHistoryBars() {
+    const wrap = document.getElementById('history-bars');
+    wrap.innerHTML = '';
+    historyData.forEach((_, i) => {
+      const div = document.createElement('div');
+      div.className = 'history-bar' + (i === historyData.length - 1 ? ' current' : '');
+      div.id = 'hbar-' + i;
+      wrap.appendChild(div);
+    });
+  }
+
+  // ── GPS ────────────────────────────────────────────────────────────────
+  window.requestGPS = function() {
+    if (!navigator.geolocation) { startDemo(); return; }
+    document.getElementById('gps-notice').style.display = 'none';
+    watchId = navigator.geolocation.watchPosition(onPosition, onGPSError, {
+      enableHighAccuracy: true,
+      maximumAge: 500,
+      timeout: 10000
+    });
+  };
+
+  function onPosition(pos) {
+    usingDemo = false;
+    const { latitude, longitude, speed: spd, heading: hdg, altitude: alt, accuracy: acc } = pos.coords;
+
+    if (tripStart === null) { tripStart = Date.now(); }
+
+    const newSpeed = spd != null ? spd * 3.6 : 0; // m/s → km/h
+    updateSpeed(newSpeed);
+
+    if (hdg != null) heading = hdg;
+    altitude = alt;
+    accuracy = acc;
+
+    if (lat !== null) {
+      const d = haversine(lat, lng, latitude, longitude);
+      distance += d;
+    }
+    lat = latitude; lng = longitude;
+    trackPoints.push([lat, lng]);
+    if (trackPoints.length > 500) trackPoints.shift();
+
+    document.getElementById('gps-status-text').textContent = 'ACTIVE';
+    document.getElementById('coords-display').textContent =
+      lat.toFixed(5) + '° &nbsp;' + lng.toFixed(5) + '°';
+    document.getElementById('accuracy-display').textContent = '±' + Math.round(acc) + ' m';
+    if (alt != null) document.getElementById('alt-val').textContent = Math.round(alt);
+  }
+
+  function onGPSError(err) {
+    if (err.code === 1) {
+      document.getElementById('gps-notice').style.display = 'block';
+    }
+    if (!usingDemo) startDemo();
+  }
+
+  function startDemo() {
+    usingDemo = true;
+    if (tripStart === null) tripStart = Date.now();
+    demoLat = 37.7749; demoLng = -122.4194;
+    document.getElementById('gps-status-text').textContent = 'DEMO';
+    document.getElementById('alt-val').textContent = '42';
+    document.getElementById('accuracy-display').textContent = '±5 m';
+    setInterval(demoTick_, 1000);
+  }
+
+  function demoTick_() {
+    demoTick++;
+    // Vary speed smoothly
+    demoSpeed += (Math.random() - 0.45) * 8 * demoDir;
+    if (demoSpeed > 110) demoDir = -1;
+    if (demoSpeed < 0) { demoSpeed = 0; demoDir = 1; }
+    demoSpeed = Math.max(0, Math.min(130, demoSpeed));
+
+    demoHeading = (demoHeading + (Math.random() - 0.5) * 5 + 360) % 360;
+
+    const rad = demoHeading * Math.PI / 180;
+    const step = demoSpeed / 3600 / 111; // rough deg per second
+    demoLat += Math.cos(rad) * step;
+    demoLng += Math.sin(rad) * step;
+
+    lat = demoLat; lng = demoLng;
+    heading = demoHeading;
+
+    updateSpeed(demoSpeed);
+    if (trackPoints.length === 0 || haversine(
+      trackPoints[trackPoints.length-1][0], trackPoints[trackPoints.length-1][1],
+      lat, lng) > 0.001) {
+      trackPoints.push([lat, lng]);
+      if (trackPoints.length > 500) trackPoints.shift();
+    }
+    distance += demoSpeed / 3600;
+
+    document.getElementById('coords-display').innerHTML =
+      lat.toFixed(5) + '° &nbsp;' + lng.toFixed(5) + '°';
+  }
+
+  // ── Speed update ───────────────────────────────────────────────────────
+  function updateSpeed(spd) {
+    speed = spd;
+    if (speed > maxSpeed) maxSpeed = speed;
+    speedSum += speed; speedCount++;
+    avgSpeed = speedSum / speedCount;
+
+    historyData.push(Math.round(speed));
+    historyData.shift();
+  }
+
+  // ── Main loop ──────────────────────────────────────────────────────────
+  function renderAll() {
+    if (tripStart !== null) {
+      elapsed = Math.floor((Date.now() - tripStart) / 1000);
+    }
+    updateDOM();
+    drawSpeedo();
+    drawMap();
+    drawCompass();
+    updateHistoryBars();
+    requestAnimationFrame(renderAll);
+  }
+
+  function updateDOM() {
+    document.getElementById('speed-val').textContent = Math.round(speed);
+    document.getElementById('max-val').textContent = Math.round(maxSpeed);
+    document.getElementById('avg-val').textContent = Math.round(avgSpeed);
+    document.getElementById('dist-val').textContent = distance.toFixed(1);
+    document.getElementById('time-val').textContent = formatTime(elapsed);
+    document.getElementById('heading-dir').textContent = headingToDir(heading);
+    document.getElementById('heading-deg').textContent = Math.round(heading) + ' °';
+    if (tripStart !== null) {
+      const d = new Date(tripStart);
+      document.getElementById('trip-start').textContent =
+        d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+    }
+  }
+
+  // ── Speedometer canvas ─────────────────────────────────────────────────
+  function drawSpeedo() {
+    const W = 300, H = 300, cx = 150, cy = 155, R = 120;
+    sc.clearRect(0, 0, W, H);
+
+    const startAngle = Math.PI * 0.75;
+    const endAngle   = Math.PI * 2.25;
+    const maxKmh     = 200;
+    const fraction   = Math.min(speed / maxKmh, 1);
+    const needleAngle = startAngle + fraction * (endAngle - startAngle);
+
+    // Outer glow ring
+    const glowGrad = sc.createRadialGradient(cx, cy, R - 20, cx, cy, R + 10);
+    glowGrad.addColorStop(0, 'rgba(0,245,255,0.06)');
+    glowGrad.addColorStop(1, 'transparent');
+    sc.beginPath();
+    sc.arc(cx, cy, R, 0, Math.PI * 2);
+    sc.fillStyle = glowGrad;
+    sc.fill();
+
+    // Background arc (track)
+    sc.beginPath();
+    sc.arc(cx, cy, R - 8, startAngle, endAngle);
+    sc.strokeStyle = 'rgba(0,245,255,0.08)';
+    sc.lineWidth = 12;
+    sc.lineCap = 'round';
+    sc.stroke();
+
+    // Speed arc with gradient
+    if (fraction > 0) {
+      const arcGrad = sc.createLinearGradient(cx - R, cy, cx + R, cy);
+      arcGrad.addColorStop(0,   '#00f5ff');
+      arcGrad.addColorStop(0.5, '#00aaff');
+      arcGrad.addColorStop(1,   '#ff3366');
+      sc.beginPath();
+      sc.arc(cx, cy, R - 8, startAngle, needleAngle);
+      sc.strokeStyle = arcGrad;
+      sc.lineWidth = 12;
+      sc.lineCap = 'round';
+      sc.stroke();
+
+      // Glow on arc
+      sc.beginPath();
+      sc.arc(cx, cy, R - 8, startAngle, needleAngle);
+      sc.strokeStyle = fraction > 0.7 ? 'rgba(255,51,102,0.3)' : 'rgba(0,245,255,0.2)';
+      sc.lineWidth = 22;
+      sc.lineCap = 'round';
+      sc.stroke();
+    }
+
+    // Tick marks
+    for (let i = 0; i <= 20; i++) {
+      const a = startAngle + (i / 20) * (endAngle - startAngle);
+      const isMajor = i % 4 === 0;
+      const r1 = R - 22;
+      const r2 = isMajor ? R - 34 : R - 28;
+      sc.beginPath();
+      sc.moveTo(cx + Math.cos(a) * r1, cy + Math.sin(a) * r1);
+      sc.lineTo(cx + Math.cos(a) * r2, cy + Math.sin(a) * r2);
+      sc.strokeStyle = isMajor ? 'rgba(0,245,255,0.6)' : 'rgba(0,245,255,0.2)';
+      sc.lineWidth = isMajor ? 2 : 1;
+      sc.stroke();
+
+      if (isMajor) {
+        const label = Math.round((i / 20) * maxKmh);
+        const tr = R - 46;
+        sc.fillStyle = 'rgba(0,245,255,0.45)';
+        sc.font = '9px Courier New';
+        sc.textAlign = 'center';
+        sc.textBaseline = 'middle';
+        sc.fillText(label, cx + Math.cos(a) * tr, cy + Math.sin(a) * tr);
+      }
+    }
+
+    // Needle
+    sc.save();
+    sc.translate(cx, cy);
+    sc.rotate(needleAngle);
+    const needleGrad = sc.createLinearGradient(0, 0, R - 30, 0);
+    needleGrad.addColorStop(0, 'rgba(0,245,255,0)');
+    needleGrad.addColorStop(0.3, '#00f5ff');
+    needleGrad.addColorStop(1, '#fff');
+    sc.beginPath();
+    sc.moveTo(-10, 0);
+    sc.lineTo(R - 30, 0);
+    sc.strokeStyle = needleGrad;
+    sc.lineWidth = 2;
+    sc.lineCap = 'round';
+    sc.stroke();
+    // needle glow
+    sc.beginPath();
+    sc.moveTo(0, 0);
+    sc.lineTo(R - 30, 0);
+    sc.strokeStyle = 'rgba(0,245,255,0.25)';
+    sc.lineWidth = 6;
+    sc.stroke();
+    sc.restore();
+
+    // Center hub
+    const hubGrad = sc.createRadialGradient(cx, cy, 0, cx, cy, 12);
+    hubGrad.addColorStop(0, '#00f5ff');
+    hubGrad.addColorStop(1, 'rgba(0,245,255,0.1)');
+    sc.beginPath();
+    sc.arc(cx, cy, 10, 0, Math.PI * 2);
+    sc.fillStyle = hubGrad;
+    sc.fill();
+    sc.beginPath();
+    sc.arc(cx, cy, 10, 0, Math.PI * 2);
+    sc.strokeStyle = 'rgba(0,245,255,0.8)';
+    sc.lineWidth = 1.5;
+    sc.stroke();
+  }
+
+  // ── Map canvas ─────────────────────────────────────────────────────────
+  function drawMap() {
+    const W = mapCanvas.width, H = mapCanvas.height;
+    mc.clearRect(0, 0, W, H);
+
+    // Background
+    mc.fillStyle = '#000810';
+    mc.fillRect(0, 0, W, H);
+
+    // Grid
+    mc.strokeStyle = 'rgba(0,245,255,0.04)';
+    mc.lineWidth = 1;
+    for (let x = 0; x < W; x += 30) {
+      mc.beginPath(); mc.moveTo(x, 0); mc.lineTo(x, H); mc.stroke();
+    }
+    for (let y = 0; y < H; y += 30) {
+      mc.beginPath(); mc.moveTo(0, y); mc.lineTo(W, y); mc.stroke();
+    }
+
+    if (trackPoints.length < 2 || lat === null) {
+      // No track yet — show waiting indicator
+      mc.fillStyle = 'rgba(0,245,255,0.2)';
+      mc.font = '11px Courier New';
+      mc.textAlign = 'center';
+      mc.textBaseline = 'middle';
+      mc.fillText('AWAITING GPS SIGNAL', W / 2, H / 2);
+      return;
+    }
+
+    // Find bounding box
+    let minLat = Infinity, maxLat = -Infinity, minLng = Infinity, maxLng = -Infinity;
+    trackPoints.forEach(([la, lo]) => {
+      if (la < minLat) minLat = la; if (la > maxLat) maxLat = la;
+      if (lo < minLng) minLng = lo; if (lo > maxLng) maxLng = lo;
+    });
+
+    const pad = 20;
+    const spanLat = maxLat - minLat || 0.001;
+    const spanLng = maxLng - minLng || 0.001;
+    const scaleX = (W - pad * 2) / spanLng;
+    const scaleY = (H - pad * 2) / spanLat;
+    const scale  = Math.min(scaleX, scaleY);
+
+    function toCanvas([la, lo]) {
+      return [
+        pad + (lo - minLng) * scale + (W - pad * 2 - spanLng * scale) / 2,
+        H - pad - (la - minLat) * scale - (H - pad * 2 - spanLat * scale) / 2
+      ];
+    }
+
+    // Track line with gradient fade
+    mc.beginPath();
+    trackPoints.forEach(([la, lo], i) => {
+      const [x, y] = toCanvas([la, lo]);
+      i === 0 ? mc.moveTo(x, y) : mc.lineTo(x, y);
+    });
+    mc.strokeStyle = 'rgba(0,245,255,0.25)';
+    mc.lineWidth = 2;
+    mc.lineJoin = 'round';
+    mc.stroke();
+
+    // Recent portion brighter
+    if (trackPoints.length > 10) {
+      const recent = trackPoints.slice(-20);
+      mc.beginPath();
+      recent.forEach(([la, lo], i) => {
+        const [x, y] = toCanvas([la, lo]);
+        i === 0 ? mc.moveTo(x, y) : mc.lineTo(x, y);
+      });
+      mc.strokeStyle = 'rgba(0,245,255,0.7)';
+      mc.lineWidth = 2.5;
+      mc.stroke();
+    }
+
+    // Current position dot
+    const [cx2, cy2] = toCanvas([lat, lng]);
+    const dotGrad = mc.createRadialGradient(cx2, cy2, 0, cx2, cy2, 14);
+    dotGrad.addColorStop(0, 'rgba(0,245,255,0.3)');
+    dotGrad.addColorStop(1, 'transparent');
+    mc.beginPath();
+    mc.arc(cx2, cy2, 14, 0, Math.PI * 2);
+    mc.fillStyle = dotGrad;
+    mc.fill();
+
+    mc.beginPath();
+    mc.arc(cx2, cy2, 5, 0, Math.PI * 2);
+    mc.fillStyle = '#00f5ff';
+    mc.shadowBlur = 10;
+    mc.shadowColor = '#00f5ff';
+    mc.fill();
+    mc.shadowBlur = 0;
+
+    // Heading arrow
+    if (heading !== null) {
+      const rad = (heading - 90) * Math.PI / 180;
+      const aLen = 18;
+      mc.beginPath();
+      mc.moveTo(cx2, cy2);
+      mc.lineTo(cx2 + Math.cos(rad) * aLen, cy2 + Math.sin(rad) * aLen);
+      mc.strokeStyle = 'rgba(0,245,255,0.8)';
+      mc.lineWidth = 2;
+      mc.stroke();
+    }
+  }
+
+  // ── Compass canvas ─────────────────────────────────────────────────────
+  function drawCompass() {
+    const W = 52, H = 52, cx = 26, cy = 26, R = 22;
+    cc.clearRect(0, 0, W, H);
+
+    cc.beginPath();
+    cc.arc(cx, cy, R, 0, Math.PI * 2);
+    cc.strokeStyle = 'rgba(0,245,255,0.2)';
+    cc.lineWidth = 1.5;
+    cc.stroke();
+
+    const dirs = ['N','E','S','W'];
+    dirs.forEach((d, i) => {
+      const a = (i * 90 - 90) * Math.PI / 180;
+      const tr = R - 8;
+      cc.fillStyle = d === 'N' ? '#ff3366' : 'rgba(0,245,255,0.5)';
+      cc.font = 'bold 8px Courier New';
+      cc.textAlign = 'center';
+      cc.textBaseline = 'middle';
+      cc.fillText(d, cx + Math.cos(a) * tr, cy + Math.sin(a) * tr);
+    });
+
+    // Needle
+    cc.save();
+    cc.translate(cx, cy);
+    cc.rotate(heading * Math.PI / 180);
+
+    cc.beginPath();
+    cc.moveTo(0, -R + 6);
+    cc.lineTo(3, 2);
+    cc.lineTo(0, 0);
+    cc.lineTo(-3, 2);
+    cc.closePath();
+    cc.fillStyle = '#ff3366';
+    cc.fill();
+
+    cc.beginPath();
+    cc.moveTo(0, R - 6);
+    cc.lineTo(3, -2);
+    cc.lineTo(0, 0);
+    cc.lineTo(-3, -2);
+    cc.closePath();
+    cc.fillStyle = 'rgba(0,245,255,0.6)';
+    cc.fill();
+
+    cc.restore();
+
+    cc.beginPath();
+    cc.arc(cx, cy, 3, 0, Math.PI * 2);
+    cc.fillStyle = '#fff';
+    cc.fill();
+  }
+
+  // ── History bars ───────────────────────────────────────────────────────
+  function updateHistoryBars() {
+    const maxH = 50;
+    const peak = Math.max(...historyData, 1);
+    historyData.forEach((v, i) => {
+      const el = document.getElementById('hbar-' + i);
+      if (el) {
+        const h = Math.max(2, (v / peak) * maxH);
+        el.style.height = h + 'px';
+        const intensity = v / peak;
+        el.style.background = i === historyData.length - 1
+          ? `rgba(0,245,255,${0.4 + intensity * 0.6})`
+          : `rgba(0,245,255,${0.08 + intensity * 0.2})`;
+        if (i === historyData.length - 1 && intensity > 0.7) {
+          el.style.background = `rgba(255,51,102,${0.5 + intensity * 0.5})`;
+          el.style.boxShadow = '0 0 6px rgba(255,51,102,0.5)';
+        } else {
+          el.style.boxShadow = '';
+        }
+      }
+    });
+  }
+
+  // ── Helpers ────────────────────────────────────────────────────────────
+  function haversine(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2)**2 +
+              Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+
+  function formatTime(s) {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return m + ':' + sec.toString().padStart(2, '0');
+  }
+
+  function headingToDir(h) {
+    const dirs = ['N','NE','E','SE','S','SW','W','NW','N'];
+    return dirs[Math.round(h / 45) % 8];
+  }
+})();
+</script>
+</body>
+</html>

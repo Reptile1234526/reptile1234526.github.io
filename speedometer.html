@@ -540,6 +540,22 @@
       background: rgba(255,170,0,0.08);
       color: #ffaa00;
     }
+
+    .gps-live {
+      border-color: rgba(0,255,100,0.3);
+      background: rgba(0,255,100,0.04);
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .gps-live .gps-banner-text { color: rgba(0,255,100,0.6); }
+    .gps-live .gps-banner-text strong { color: #00ff66; }
+    .gps-live .gps-banner-btn {
+      border-color: rgba(0,255,100,0.3);
+      background: rgba(0,255,100,0.06);
+      color: #00ff66;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
@@ -556,8 +572,8 @@
   <!-- GPS activation banner -->
   <div class="gps-banner" id="gps-banner" onclick="activateGPS()">
     <div class="gps-banner-text">
-      <strong>DEMO MODE</strong>
-      Tap to use real GPS speed
+      <strong id="gps-banner-title">DEMO MODE</strong>
+      <span id="gps-banner-msg">Tap to use real GPS speed</span>
     </div>
     <button class="gps-banner-btn" id="gps-banner-btn">Enable GPS</button>
   </div>
@@ -670,10 +686,15 @@
     </div>
   </div>
 
-  <!-- Debug log -->
-  <div id="debug-panel" style="width:100%;background:rgba(0,0,0,0.8);border:1px solid rgba(0,245,255,0.15);border-radius:8px;padding:10px 12px;font-size:10px;letter-spacing:0.5px;line-height:1.8;color:rgba(0,245,255,0.6);font-family:'Courier New',monospace;">
-    <div style="color:rgba(0,245,255,0.35);letter-spacing:2px;margin-bottom:6px;font-size:9px;">GPS DEBUG LOG</div>
-    <div id="debug-log"></div>
+  <!-- Debug log (hidden by default) -->
+  <div id="debug-panel" style="width:100%;display:none;">
+    <div style="background:rgba(0,0,0,0.8);border:1px solid rgba(0,245,255,0.15);border-radius:8px;padding:10px 12px;font-size:10px;letter-spacing:0.5px;line-height:1.8;color:rgba(0,245,255,0.6);font-family:'Courier New',monospace;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <span style="color:rgba(0,245,255,0.35);letter-spacing:2px;font-size:9px;">GPS DEBUG LOG</span>
+        <span onclick="document.getElementById('debug-panel').style.display='none'" style="cursor:pointer;color:rgba(0,245,255,0.4);font-size:11px;">✕</span>
+      </div>
+      <div id="debug-log"></div>
+    </div>
   </div>
 
 </div>
@@ -853,9 +874,17 @@
       usingDemo = false;
       if (demoInterval) { clearInterval(demoInterval); demoInterval = null; }
       document.getElementById('gps-status-text').textContent = 'GPS';
-      document.getElementById('gps-banner').style.display = 'none';
       dbg('switched to live GPS', '#00ff88');
     }
+
+    // Update banner to "GPS LIVE" state
+    const banner = document.getElementById('gps-banner');
+    banner.classList.remove('gps-denied');
+    banner.classList.add('gps-live');
+    document.getElementById('gps-banner-title').textContent = 'GPS LIVE';
+    document.getElementById('gps-banner-msg').textContent =
+      '±' + Math.round(acc) + 'm accuracy' + (newSpeed > 0 ? '  •  ' + newSpeed.toFixed(0) + ' km/h' : '  •  stationary');
+    document.getElementById('gps-banner-btn').textContent = '●';
 
     speed = newSpeed;
     if (hdg != null) heading = hdg;
@@ -891,9 +920,12 @@
 
   function setBannerDenied(msg) {
     const banner = document.getElementById('gps-banner');
+    banner.classList.remove('gps-live');
     banner.classList.add('gps-denied');
-    banner.querySelector('.gps-banner-text strong').textContent = 'GPS UNAVAILABLE';
-    banner.querySelector('.gps-banner-text').childNodes[2].textContent = msg;
+    banner.style.pointerEvents = '';
+    banner.style.cursor = 'pointer';
+    document.getElementById('gps-banner-title').textContent = 'GPS UNAVAILABLE';
+    document.getElementById('gps-banner-msg').textContent = msg;
     document.getElementById('gps-banner-btn').textContent = 'Retry';
   }
 

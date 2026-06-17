@@ -670,6 +670,11 @@
     </div>
   </div>
 
+  <!-- Debug log -->
+  <div id="debug-panel" style="width:100%;background:rgba(0,0,0,0.8);border:1px solid rgba(0,245,255,0.15);border-radius:8px;padding:10px 12px;font-size:10px;letter-spacing:0.5px;line-height:1.8;color:rgba(0,245,255,0.6);font-family:'Courier New',monospace;">
+    <div style="color:rgba(0,245,255,0.35);letter-spacing:2px;margin-bottom:6px;font-size:9px;">GPS DEBUG LOG</div>
+    <div id="debug-log"></div>
+  </div>
 
 </div>
 
@@ -772,31 +777,51 @@
     });
   }
 
+  // ── Debug log ──────────────────────────────────────────────────────────
+  function dbg(msg, color) {
+    const el = document.getElementById('debug-log');
+    if (!el) return;
+    const t = new Date().toTimeString().slice(0,8);
+    const line = document.createElement('div');
+    line.style.color = color || 'rgba(0,245,255,0.7)';
+    line.textContent = t + '  ' + msg;
+    el.appendChild(line);
+    // keep last 20 lines
+    while (el.children.length > 20) el.removeChild(el.firstChild);
+  }
+
   // ── GPS ────────────────────────────────────────────────────────────────
   let lastGPSPos = null, lastGPSTime = null;
 
   function activateGPS() {
+    dbg('activateGPS() called');
     if (!navigator.geolocation) {
+      dbg('navigator.geolocation missing!', '#ff3366');
       setBannerDenied('Location not supported by this browser');
       return;
     }
+    dbg('geolocation API present');
     if (watchId != null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
 
     setBannerState('Locating…', false);
 
-    // Step 1: fast low-accuracy fix to confirm permission and get initial position quickly
+    dbg('calling getCurrentPosition (low accuracy)…');
     navigator.geolocation.getCurrentPosition(
       function(pos) {
+        dbg('getCurrentPosition SUCCESS  acc=±' + Math.round(pos.coords.accuracy) + 'm  spd=' + pos.coords.speed, '#00ff88');
         onPosition(pos);
         setBannerState('GPS active', false);
-        // Step 2: now start high-accuracy watch for speed tracking
+        dbg('starting watchPosition (high accuracy)…');
         watchId = navigator.geolocation.watchPosition(onPosition, onGPSError, {
           enableHighAccuracy: true,
           maximumAge: 1000,
           timeout: 10000
         });
       },
-      onGPSError,
+      function(err) {
+        dbg('getCurrentPosition ERROR  code=' + err.code + '  ' + err.message, '#ff3366');
+        onGPSError(err);
+      },
       { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 }
     );
   }
@@ -811,12 +836,16 @@
     let newSpeed = 0;
     if (spd != null && spd >= 0) {
       newSpeed = spd * 3.6;
+      dbg('pos  acc=±' + Math.round(acc) + 'm  spd(native)=' + newSpeed.toFixed(1) + 'km/h');
     } else if (lastGPSPos && lastGPSTime) {
       const dt = (now - lastGPSTime) / 1000;
       if (dt > 0.5 && dt < 30) {
         const d = haversine(lastGPSPos[0], lastGPSPos[1], latitude, longitude);
         newSpeed = (d / dt) * 3600;
       }
+      dbg('pos  acc=±' + Math.round(acc) + 'm  spd(calc)=' + newSpeed.toFixed(1) + 'km/h  hdg=' + (hdg != null ? Math.round(hdg) : 'null'));
+    } else {
+      dbg('pos  acc=±' + Math.round(acc) + 'm  (first fix, no speed yet)');
     }
     lastGPSPos  = [latitude, longitude];
     lastGPSTime = now;
@@ -827,6 +856,7 @@
       if (demoInterval) { clearInterval(demoInterval); demoInterval = null; }
       document.getElementById('gps-status-text').textContent = 'GPS';
       document.getElementById('gps-banner').style.display = 'none';
+      dbg('switched to live GPS', '#00ff88');
     }
 
     speed = newSpeed;
@@ -845,6 +875,7 @@
   }
 
   function onGPSError(err) {
+    dbg('GPS ERROR code=' + err.code + ' — ' + err.message, '#ff3366');
     const messages = {
       1: 'Permission denied — allow location in browser settings',
       2: 'Signal unavailable — go outside and retry',

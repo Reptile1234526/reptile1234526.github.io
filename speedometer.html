@@ -635,13 +635,14 @@
   const cc = compassCanvas.getContext('2d');
 
   // ── Trip control ──────────────────────────────────────────────────────
-  window.toggleTrip = function() {
+  function toggleTrip() {
     if (!tripActive) {
       startTrip();
     } else {
       stopTrip();
     }
-  };
+  }
+  window.toggleTrip = toggleTrip;
 
   function startTrip() {
     tripActive = true;
@@ -703,7 +704,7 @@
   }
 
   // ── GPS ────────────────────────────────────────────────────────────────
-  window.requestGPS = function() {
+  function requestGPS() {
     if (!navigator.geolocation) { startDemo(); return; }
     document.getElementById('gps-notice').style.display = 'none';
     watchId = navigator.geolocation.watchPosition(onPosition, onGPSError, {
@@ -711,7 +712,8 @@
       maximumAge: 500,
       timeout: 10000
     });
-  };
+  }
+  window.requestGPS = requestGPS;
 
   function onPosition(pos) {
     usingDemo = false;

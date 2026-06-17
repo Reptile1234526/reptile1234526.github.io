@@ -382,6 +382,102 @@
       background: rgba(0,245,255,0.7);
       box-shadow: 0 0 6px rgba(0,245,255,0.4);
     }
+
+    /* Trip button */
+    .trip-btn-wrap {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+
+    .trip-btn {
+      position: relative;
+      width: 200px;
+      height: 52px;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      cursor: pointer;
+      overflow: hidden;
+      transition: transform 0.1s, box-shadow 0.2s;
+    }
+
+    .trip-btn:active { transform: scale(0.97); }
+
+    .trip-btn.start {
+      background: rgba(0,245,255,0.08);
+      border: 1px solid rgba(0,245,255,0.45);
+      color: #00f5ff;
+      box-shadow: 0 0 18px rgba(0,245,255,0.15), inset 0 0 20px rgba(0,245,255,0.05);
+    }
+
+    .trip-btn.start:hover {
+      box-shadow: 0 0 28px rgba(0,245,255,0.35), inset 0 0 20px rgba(0,245,255,0.1);
+    }
+
+    .trip-btn.stop {
+      background: rgba(255,51,102,0.08);
+      border: 1px solid rgba(255,51,102,0.45);
+      color: #ff3366;
+      box-shadow: 0 0 18px rgba(255,51,102,0.15), inset 0 0 20px rgba(255,51,102,0.05);
+    }
+
+    .trip-btn.stop:hover {
+      box-shadow: 0 0 28px rgba(255,51,102,0.35), inset 0 0 20px rgba(255,51,102,0.1);
+    }
+
+    .trip-btn::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+      transition: left 0.4s;
+    }
+
+    .trip-btn:hover::before { left: 160%; }
+
+    /* Summary overlay */
+    .trip-summary {
+      width: 100%;
+      background: rgba(0,245,255,0.04);
+      border: 1px solid rgba(0,245,255,0.2);
+      border-radius: 10px;
+      padding: 18px 16px;
+      display: none;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .trip-summary::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0,245,255,0.5), transparent);
+    }
+
+    .summary-title {
+      font-size: 9px;
+      letter-spacing: 4px;
+      color: rgba(0,245,255,0.4);
+      text-transform: uppercase;
+      text-align: center;
+      margin-bottom: 14px;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .summary-item { text-align: center; }
   </style>
 </head>
 <body>
@@ -457,6 +553,13 @@
     </div>
   </div>
 
+  <!-- Trip start/stop button -->
+  <div class="trip-btn-wrap">
+    <button class="trip-btn start" id="trip-btn" onclick="toggleTrip()">
+      &#9654; &nbsp;Start Trip
+    </button>
+  </div>
+
   <!-- Trip -->
   <div class="trip-card">
     <div class="trip-item">
@@ -466,6 +569,33 @@
     <div class="trip-item">
       <div class="stat-label">Satellites</div>
       <div class="stat-value" style="font-size:14px;" id="sat-val">--</div>
+    </div>
+  </div>
+
+  <!-- Trip summary (shown after stop) -->
+  <div class="trip-summary" id="trip-summary">
+    <div class="summary-title">Trip Complete</div>
+    <div class="summary-grid">
+      <div class="summary-item">
+        <div class="stat-label">Distance</div>
+        <div class="stat-value" id="sum-dist">--</div>
+        <div class="stat-sub">km</div>
+      </div>
+      <div class="summary-item">
+        <div class="stat-label">Duration</div>
+        <div class="stat-value" id="sum-time">--</div>
+        <div class="stat-sub">elapsed</div>
+      </div>
+      <div class="summary-item">
+        <div class="stat-label">Top Speed</div>
+        <div class="stat-value" id="sum-max">--</div>
+        <div class="stat-sub">km/h</div>
+      </div>
+      <div class="summary-item">
+        <div class="stat-label">Avg Speed</div>
+        <div class="stat-value" id="sum-avg">--</div>
+        <div class="stat-sub">km/h</div>
+      </div>
     </div>
   </div>
 
@@ -483,13 +613,14 @@
   let speed = 0, maxSpeed = 0, avgSpeed = 0, distance = 0;
   let heading = 0, altitude = null, accuracy = null;
   let lat = null, lng = null;
-  let tripStart = null, elapsed = 0;
-  let speedSamples = [], speedSum = 0, speedCount = 0;
+  let tripStart = null, tripEnd = null, elapsed = 0;
+  let speedSum = 0, speedCount = 0;
   let prevPos = null;
   let trackPoints = [];
   let historyData = Array(32).fill(0);
   let watchId = null;
   let usingDemo = false;
+  let tripActive = false;
 
   // Demo simulation state
   let demoSpeed = 0, demoHeading = 45, demoLat = 37.7749, demoLng = -122.4194;
@@ -502,6 +633,50 @@
   const mc = mapCanvas.getContext('2d');
   const compassCanvas = document.getElementById('compass-canvas');
   const cc = compassCanvas.getContext('2d');
+
+  // ── Trip control ──────────────────────────────────────────────────────
+  window.toggleTrip = function() {
+    if (!tripActive) {
+      startTrip();
+    } else {
+      stopTrip();
+    }
+  };
+
+  function startTrip() {
+    tripActive = true;
+    tripStart = Date.now();
+    tripEnd = null;
+    elapsed = 0;
+    maxSpeed = 0;
+    distance = 0;
+    speedSum = 0;
+    speedCount = 0;
+    avgSpeed = 0;
+    trackPoints = [];
+    historyData = Array(32).fill(0);
+    buildHistoryBars();
+    document.getElementById('trip-summary').style.display = 'none';
+    const btn = document.getElementById('trip-btn');
+    btn.className = 'trip-btn stop';
+    btn.innerHTML = '&#9646;&#9646; &nbsp;Stop Trip';
+  }
+
+  function stopTrip() {
+    tripActive = false;
+    tripEnd = Date.now();
+    const btn = document.getElementById('trip-btn');
+    btn.className = 'trip-btn start';
+    btn.innerHTML = '&#9654; &nbsp;New Trip';
+
+    // Show summary
+    const summary = document.getElementById('trip-summary');
+    summary.style.display = 'block';
+    document.getElementById('sum-dist').textContent = distance.toFixed(2);
+    document.getElementById('sum-time').textContent = formatTime(Math.floor((tripEnd - tripStart) / 1000));
+    document.getElementById('sum-max').textContent = Math.round(maxSpeed);
+    document.getElementById('sum-avg').textContent = Math.round(avgSpeed);
+  }
 
   // ── Init ───────────────────────────────────────────────────────────────
   resizeMap();
@@ -542,22 +717,18 @@
     usingDemo = false;
     const { latitude, longitude, speed: spd, heading: hdg, altitude: alt, accuracy: acc } = pos.coords;
 
-    if (tripStart === null) { tripStart = Date.now(); }
-
-    const newSpeed = spd != null ? spd * 3.6 : 0; // m/s → km/h
-    updateSpeed(newSpeed);
+    const newSpeed = spd != null ? spd * 3.6 : 0;
+    speed = newSpeed;
 
     if (hdg != null) heading = hdg;
     altitude = alt;
     accuracy = acc;
 
-    if (lat !== null) {
-      const d = haversine(lat, lng, latitude, longitude);
-      distance += d;
+    if (tripActive) {
+      updateTripStats(newSpeed, latitude, longitude);
     }
+
     lat = latitude; lng = longitude;
-    trackPoints.push([lat, lng]);
-    if (trackPoints.length > 500) trackPoints.shift();
 
     document.getElementById('gps-status-text').textContent = 'ACTIVE';
     document.getElementById('coords-display').textContent =
@@ -575,8 +746,8 @@
 
   function startDemo() {
     usingDemo = true;
-    if (tripStart === null) tripStart = Date.now();
     demoLat = 37.7749; demoLng = -122.4194;
+    lat = demoLat; lng = demoLng;
     document.getElementById('gps-status-text').textContent = 'DEMO';
     document.getElementById('alt-val').textContent = '42';
     document.getElementById('accuracy-display').textContent = '±5 m';
@@ -585,7 +756,6 @@
 
   function demoTick_() {
     demoTick++;
-    // Vary speed smoothly
     demoSpeed += (Math.random() - 0.45) * 8 * demoDir;
     if (demoSpeed > 110) demoDir = -1;
     if (demoSpeed < 0) { demoSpeed = 0; demoDir = 1; }
@@ -594,40 +764,43 @@
     demoHeading = (demoHeading + (Math.random() - 0.5) * 5 + 360) % 360;
 
     const rad = demoHeading * Math.PI / 180;
-    const step = demoSpeed / 3600 / 111; // rough deg per second
+    const step = demoSpeed / 3600 / 111;
     demoLat += Math.cos(rad) * step;
     demoLng += Math.sin(rad) * step;
 
-    lat = demoLat; lng = demoLng;
     heading = demoHeading;
+    speed = demoSpeed;
 
-    updateSpeed(demoSpeed);
-    if (trackPoints.length === 0 || haversine(
-      trackPoints[trackPoints.length-1][0], trackPoints[trackPoints.length-1][1],
-      lat, lng) > 0.001) {
-      trackPoints.push([lat, lng]);
-      if (trackPoints.length > 500) trackPoints.shift();
+    if (tripActive) {
+      updateTripStats(demoSpeed, demoLat, demoLng);
     }
-    distance += demoSpeed / 3600;
+
+    lat = demoLat; lng = demoLng;
 
     document.getElementById('coords-display').innerHTML =
       lat.toFixed(5) + '° &nbsp;' + lng.toFixed(5) + '°';
   }
 
-  // ── Speed update ───────────────────────────────────────────────────────
-  function updateSpeed(spd) {
-    speed = spd;
-    if (speed > maxSpeed) maxSpeed = speed;
-    speedSum += speed; speedCount++;
+  // ── Trip stat accumulation (only when tripActive) ──────────────────────
+  function updateTripStats(spd, newLat, newLng) {
+    if (spd > maxSpeed) maxSpeed = spd;
+    speedSum += spd; speedCount++;
     avgSpeed = speedSum / speedCount;
 
-    historyData.push(Math.round(speed));
+    if (trackPoints.length > 0) {
+      const prev = trackPoints[trackPoints.length - 1];
+      distance += haversine(prev[0], prev[1], newLat, newLng);
+    }
+    trackPoints.push([newLat, newLng]);
+    if (trackPoints.length > 500) trackPoints.shift();
+
+    historyData.push(Math.round(spd));
     historyData.shift();
   }
 
   // ── Main loop ──────────────────────────────────────────────────────────
   function renderAll() {
-    if (tripStart !== null) {
+    if (tripActive && tripStart !== null) {
       elapsed = Math.floor((Date.now() - tripStart) / 1000);
     }
     updateDOM();

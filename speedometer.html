@@ -796,33 +796,31 @@
   function activateGPS() {
     dbg('activateGPS() called');
     if (!navigator.geolocation) {
-      dbg('navigator.geolocation missing!', '#ff3366');
+      dbg('geolocation API missing!', '#ff3366');
       setBannerDenied('Location not supported by this browser');
       return;
     }
     dbg('geolocation API present');
     if (watchId != null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
-
     setBannerState('Locating…', false);
 
-    dbg('calling getCurrentPosition (low accuracy)…');
-    navigator.geolocation.getCurrentPosition(
+    // Heartbeat so user can see it's alive while waiting
+    const heartbeat = setInterval(() => dbg('…still waiting for fix…', 'rgba(0,245,255,0.4)'), 3000);
+
+    dbg('calling watchPosition (highAccuracy=true, maxAge=30s)…');
+    watchId = navigator.geolocation.watchPosition(
       function(pos) {
-        dbg('getCurrentPosition SUCCESS  acc=±' + Math.round(pos.coords.accuracy) + 'm  spd=' + pos.coords.speed, '#00ff88');
+        if (heartbeat) clearInterval(heartbeat);
+        dbg('watchPosition fired!  acc=±' + Math.round(pos.coords.accuracy) + 'm  spd=' + pos.coords.speed, '#00ff88');
         onPosition(pos);
         setBannerState('GPS active', false);
-        dbg('starting watchPosition (high accuracy)…');
-        watchId = navigator.geolocation.watchPosition(onPosition, onGPSError, {
-          enableHighAccuracy: true,
-          maximumAge: 1000,
-          timeout: 10000
-        });
       },
       function(err) {
-        dbg('getCurrentPosition ERROR  code=' + err.code + '  ' + err.message, '#ff3366');
+        if (heartbeat) clearInterval(heartbeat);
+        dbg('watchPosition ERROR  code=' + err.code + '  ' + err.message, '#ff3366');
         onGPSError(err);
       },
-      { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 }
+      { enableHighAccuracy: true, maximumAge: 30000, timeout: 60000 }
     );
   }
   window.activateGPS = activateGPS;

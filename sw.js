@@ -1,6 +1,6 @@
-const APP_CACHE  = 'speedo-app-v1';
+const APP_CACHE  = 'speedo-app-v2';
 const TILE_CACHE = 'speedo-tiles-v1';
-const MAX_TILES  = 1000;
+const MAX_TILES  = 20000;
 
 const APP_ASSETS = [
   '/speedometer.html',

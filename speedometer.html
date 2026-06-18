@@ -584,6 +584,56 @@
       color: #00ff66;
       pointer-events: none;
     }
+
+    /* Offline map download */
+    .download-panel {
+      background: rgba(0,245,255,0.04);
+      border: 1px solid rgba(0,245,255,0.12);
+      border-radius: 8px;
+      padding: 14px 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    .download-panel::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0,245,255,0.4), transparent);
+    }
+    .dl-info {
+      font-size: 12px;
+      color: rgba(0,245,255,0.8);
+      letter-spacing: 0.5px;
+    }
+    .dl-sub {
+      font-size: 10px;
+      color: rgba(0,245,255,0.35);
+      letter-spacing: 1px;
+      margin-top: 3px;
+    }
+    .progress-bar-wrap {
+      width: 100%;
+      height: 5px;
+      background: rgba(0,245,255,0.1);
+      border-radius: 3px;
+      overflow: hidden;
+      margin: 10px 0 4px;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #00f5ff, #00aaff);
+      border-radius: 3px;
+      box-shadow: 0 0 6px rgba(0,245,255,0.5);
+      transition: width 0.2s;
+    }
+    .progress-text {
+      font-size: 10px;
+      color: rgba(0,245,255,0.45);
+      letter-spacing: 1px;
+      text-align: right;
+    }
   </style>
 </head>
 <body>
@@ -652,6 +702,24 @@
       <div class="map-overlay"></div>
       <div class="map-coords" id="coords-display">--° --°</div>
       <div class="map-accuracy" id="accuracy-display">±-- m</div>
+    </div>
+  </div>
+
+  <!-- Offline map download -->
+  <div class="map-section">
+    <div class="section-label">Offline Maps</div>
+    <div class="download-panel" id="download-panel">
+      <div class="dl-info" id="dl-info">Italy road map &mdash; ~13,186 tiles (~130 MB)</div>
+      <div class="dl-sub" id="dl-sub">Zoom 5&ndash;11 &bull; works with no signal</div>
+      <div id="dl-progress-wrap" style="display:none;">
+        <div class="progress-bar-wrap"><div class="progress-bar-fill" id="dl-progress-fill"></div></div>
+        <div class="progress-text" id="dl-progress-text">0 / 0</div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:12px;align-items:center;">
+        <button class="btn" id="dl-start-btn" onclick="startItalyDownload()">&#8595; Download Italy</button>
+        <button class="btn" id="dl-cancel-btn" onclick="cancelItalyDownload()" style="display:none;border-color:rgba(255,51,102,0.4);color:#ff3366;">&#10005; Cancel</button>
+      </div>
+      <div id="dl-status-msg" style="font-size:10px;color:rgba(0,245,255,0.4);letter-spacing:1px;margin-top:8px;min-height:14px;"></div>
     </div>
   </div>
 
@@ -1401,6 +1469,101 @@
     const dirs = ['N','NE','E','SE','S','SW','W','NW','N'];
     return dirs[Math.round(h / 45) % 8];
   }
+
+  // ── Italy offline tile downloader ─────────────────────────────────────
+  const ITALY = { s: 35.4, n: 47.1, w: 6.6, e: 18.6 };
+  const DL_ZOOMS = [5, 6, 7, 8, 9, 10, 11];
+  const DL_CONCURRENCY = 6;
+  let dlActive = false, dlCancelled = false;
+
+  function lon2tile(lon, z) { return Math.floor((lon + 180) / 360 * (1 << z)); }
+  function lat2tile(lat, z) {
+    const s = Math.sin(lat * Math.PI / 180);
+    return Math.floor((0.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI)) * (1 << z));
+  }
+
+  function buildTileList() {
+    const tiles = [], subs = ['a','b','c','d'];
+    for (const z of DL_ZOOMS) {
+      const x0 = lon2tile(ITALY.w, z), x1 = lon2tile(ITALY.e, z);
+      const y0 = lat2tile(ITALY.n, z), y1 = lat2tile(ITALY.s, z);
+      for (let x = x0; x <= x1; x++)
+        for (let y = y0; y <= y1; y++)
+          tiles.push(`https://${subs[(x+y)%4]}.basemaps.cartocdn.com/dark_all/${z}/${x}/${y}.png`);
+    }
+    return tiles;
+  }
+
+  async function startItalyDownload() {
+    if (dlActive) return;
+    if (!('caches' in window)) {
+      document.getElementById('dl-status-msg').textContent = 'Cache API not available — open via HTTPS or install as app';
+      return;
+    }
+    dlActive = true; dlCancelled = false;
+    const tiles = buildTileList();
+    const total = tiles.length;
+    let done = 0, failed = 0, idx = 0;
+
+    document.getElementById('dl-start-btn').style.display = 'none';
+    document.getElementById('dl-cancel-btn').style.display = '';
+    document.getElementById('dl-progress-wrap').style.display = '';
+    document.getElementById('dl-status-msg').textContent = 'Connecting to tile server…';
+
+    const fillEl = document.getElementById('dl-progress-fill');
+    const textEl = document.getElementById('dl-progress-text');
+    textEl.textContent = '0 / ' + total;
+
+    const cache = await caches.open('speedo-tiles-v1');
+
+    async function worker() {
+      while (idx < total && !dlCancelled) {
+        const url = tiles[idx++];
+        try {
+          const existing = await cache.match(url);
+          if (existing) {
+            done++;
+          } else {
+            const resp = await fetch(url, { mode: 'cors', cache: 'no-store' });
+            if (resp.ok) await cache.put(url, resp);
+            else failed++;
+            done++;
+          }
+        } catch { failed++; done++; }
+
+        if (done % 20 === 0 || done === total) {
+          const pct = (done / total * 100).toFixed(1);
+          fillEl.style.width = pct + '%';
+          textEl.textContent = done + ' / ' + total + (failed ? '  (' + failed + ' failed)' : '');
+          const mbDone = (done * 10 / 1024).toFixed(0);
+          document.getElementById('dl-status-msg').textContent =
+            pct + '%  •  ~' + mbDone + ' MB  •  zoom ' + (tiles[idx - 1] || '').split('/')[5];
+        }
+      }
+    }
+
+    await Promise.all(Array.from({ length: DL_CONCURRENCY }, worker));
+
+    dlActive = false;
+    document.getElementById('dl-cancel-btn').style.display = 'none';
+    document.getElementById('dl-start-btn').style.display = '';
+
+    if (dlCancelled) {
+      document.getElementById('dl-info').textContent = 'Paused — ' + done + ' / ' + total + ' tiles saved';
+      document.getElementById('dl-start-btn').textContent = '↓ Resume';
+      document.getElementById('dl-status-msg').textContent = 'Tap Resume to continue from where it left off';
+    } else {
+      document.getElementById('dl-info').textContent = '✓ Italy cached — ' + done + ' tiles';
+      document.getElementById('dl-sub').style.display = 'none';
+      document.getElementById('dl-start-btn').textContent = '↓ Re-download';
+      document.getElementById('dl-status-msg').textContent = 'Maps available offline · Italy Z5–Z11';
+      document.getElementById('dl-status-msg').style.color = 'rgba(0,255,100,0.6)';
+    }
+  }
+  window.startItalyDownload = startItalyDownload;
+
+  function cancelItalyDownload() { dlCancelled = true; }
+  window.cancelItalyDownload = cancelItalyDownload;
 })();
 </script>
 <script>

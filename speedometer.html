@@ -587,9 +587,12 @@
 
   <header>
     <div class="logo">Speedo&nbsp;&bull;&nbsp;GPS</div>
-    <div style="display:flex;gap:8px;align-items:center;font-size:10px;color:rgba(0,245,255,0.4);letter-spacing:2px;">
-      <span id="gps-status-text">DEMO</span>
-      <div class="status-dot" id="status-dot"></div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <button id="unit-toggle" onclick="toggleUnits()" style="background:rgba(0,245,255,0.06);border:1px solid rgba(0,245,255,0.3);border-radius:4px;color:#00f5ff;font-family:'Courier New',monospace;font-size:10px;letter-spacing:2px;padding:4px 10px;cursor:pointer;">MPH</button>
+      <div style="display:flex;gap:8px;align-items:center;font-size:10px;color:rgba(0,245,255,0.4);letter-spacing:2px;">
+        <span id="gps-status-text">DEMO</span>
+        <div class="status-dot" id="status-dot"></div>
+      </div>
     </div>
   </header>
 
@@ -607,7 +610,7 @@
     <canvas class="speedometer-canvas" id="speedo-canvas" width="300" height="300"></canvas>
     <div class="speed-display">
       <div class="speed-value" id="speed-val">0</div>
-      <div class="speed-unit">KM/H</div>
+      <div class="speed-unit" id="speed-unit">KM/H</div>
       <div class="max-speed">MAX&nbsp;<span id="max-val">0</span></div>
     </div>
   </div>
@@ -617,12 +620,12 @@
     <div class="stat-card">
       <div class="stat-label">Avg</div>
       <div class="stat-value" id="avg-val">0</div>
-      <div class="stat-sub">km/h</div>
+      <div class="stat-sub" id="avg-unit">km/h</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Distance</div>
       <div class="stat-value" id="dist-val">0.0</div>
-      <div class="stat-sub">km</div>
+      <div class="stat-sub" id="dist-unit">km</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Time</div>
@@ -660,7 +663,7 @@
     <div class="altitude-card">
       <div class="stat-label">Altitude</div>
       <div class="stat-value" id="alt-val">--</div>
-      <div class="stat-sub">meters</div>
+      <div class="stat-sub" id="alt-unit">meters</div>
     </div>
   </div>
 
@@ -690,7 +693,7 @@
       <div class="summary-item">
         <div class="stat-label">Distance</div>
         <div class="stat-value" id="sum-dist">--</div>
-        <div class="stat-sub">km</div>
+        <div class="stat-sub" id="sum-dist-unit">km</div>
       </div>
       <div class="summary-item">
         <div class="stat-label">Duration</div>
@@ -700,12 +703,12 @@
       <div class="summary-item">
         <div class="stat-label">Top Speed</div>
         <div class="stat-value" id="sum-max">--</div>
-        <div class="stat-sub">km/h</div>
+        <div class="stat-sub" id="sum-spd-unit">km/h</div>
       </div>
       <div class="summary-item">
         <div class="stat-label">Avg Speed</div>
         <div class="stat-value" id="sum-avg">--</div>
-        <div class="stat-sub">km/h</div>
+        <div class="stat-sub" id="sum-avg-unit">km/h</div>
       </div>
     </div>
   </div>
@@ -725,6 +728,32 @@
 
 <script>
 (function() {
+  // ── Units ──────────────────────────────────────────────────────────────
+  let useImperial = false;
+
+  function spd(kmh)  { return useImperial ? kmh * 0.621371 : kmh; }
+  function dist(km)  { return useImperial ? km  * 0.621371 : km; }
+  function alt(m)    { return useImperial ? m   * 3.28084  : m; }
+  function spdUnit() { return useImperial ? 'mph'   : 'km/h'; }
+  function distUnit(){ return useImperial ? 'mi'    : 'km'; }
+  function altUnit() { return useImperial ? 'feet'  : 'meters'; }
+  function maxSpd()  { return useImperial ? 140 : 200; }
+
+  function toggleUnits() {
+    useImperial = !useImperial;
+    const btn = document.getElementById('unit-toggle');
+    btn.textContent = useImperial ? 'KM/H' : 'MPH';
+    // Update all static unit labels
+    document.getElementById('speed-unit').textContent  = spdUnit().toUpperCase();
+    document.getElementById('avg-unit').textContent    = spdUnit();
+    document.getElementById('dist-unit').textContent   = distUnit();
+    document.getElementById('alt-unit').textContent    = altUnit();
+    document.getElementById('sum-dist-unit').textContent = distUnit();
+    document.getElementById('sum-spd-unit').textContent  = spdUnit();
+    document.getElementById('sum-avg-unit').textContent  = spdUnit();
+  }
+  window.toggleUnits = toggleUnits;
+
   // ── State ──────────────────────────────────────────────────────────────
   let speed = 0, displaySpeed = 0;
   let maxSpeed = 0, avgSpeed = 0, distance = 0;
@@ -836,10 +865,14 @@
     // Show summary
     const summary = document.getElementById('trip-summary');
     summary.style.display = 'block';
-    document.getElementById('sum-dist').textContent = distance.toFixed(2);
+    document.getElementById('sum-dist').textContent = dist(distance).toFixed(2);
     document.getElementById('sum-time').textContent = formatTime(Math.floor((tripEnd - tripStart) / 1000));
-    document.getElementById('sum-max').textContent = Math.round(maxSpeed);
-    document.getElementById('sum-avg').textContent = Math.round(avgSpeed);
+    document.getElementById('sum-max').textContent  = Math.round(spd(maxSpeed));
+    document.getElementById('sum-avg').textContent  = Math.round(spd(avgSpeed));
+    // Also update unit labels on summary in case user toggled mid-trip
+    document.getElementById('sum-dist-unit').textContent = distUnit();
+    document.getElementById('sum-spd-unit').textContent  = spdUnit();
+    document.getElementById('sum-avg-unit').textContent  = spdUnit();
   }
 
   // ── Init ───────────────────────────────────────────────────────────────
@@ -968,7 +1001,6 @@
     document.getElementById('coords-display').textContent =
       lat.toFixed(5) + '°  ' + lng.toFixed(5) + '°';
     document.getElementById('accuracy-display').textContent = '±' + Math.round(acc) + ' m';
-    if (alt != null) document.getElementById('alt-val').textContent = Math.round(alt);
   }
 
   function onGPSError(err) {
@@ -1138,10 +1170,12 @@
   }
 
   function updateDOM() {
-    document.getElementById('speed-val').textContent = Math.round(speed);
-    document.getElementById('max-val').textContent = Math.round(maxSpeed);
-    document.getElementById('avg-val').textContent = Math.round(avgSpeed);
-    document.getElementById('dist-val').textContent = distance.toFixed(1);
+    document.getElementById('speed-val').textContent = Math.round(spd(speed));
+    document.getElementById('max-val').textContent   = Math.round(spd(maxSpeed));
+    document.getElementById('avg-val').textContent   = Math.round(spd(avgSpeed));
+    document.getElementById('dist-val').textContent  = dist(distance).toFixed(dist(distance) < 10 ? 2 : 1);
+    // Altitude — only update when live
+    if (altitude != null) document.getElementById('alt-val').textContent = Math.round(alt(altitude));
     document.getElementById('time-val').textContent = formatTime(elapsed);
     if (!compassActive) {
       document.getElementById('heading-dir').textContent = headingToDir(heading);
@@ -1161,8 +1195,8 @@
 
     const startAngle = Math.PI * 0.75;
     const endAngle   = Math.PI * 2.25;
-    const maxKmh     = 200;
-    const fraction   = Math.min(displaySpeed / maxKmh, 1);
+    const maxKmh     = maxSpd();
+    const fraction   = Math.min(spd(displaySpeed) / maxKmh, 1);
     const needleAngle = startAngle + fraction * (endAngle - startAngle);
 
     // Outer glow ring

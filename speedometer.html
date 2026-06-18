@@ -919,8 +919,12 @@
     } else if (lastGPSPos && lastGPSTime) {
       const dt = (now - lastGPSTime) / 1000;
       if (dt > 0.5 && dt < 30) {
-        const d = haversine(lastGPSPos[0], lastGPSPos[1], latitude, longitude);
-        newSpeed = (d / dt) * 3600;
+        const movedMeters = haversine(lastGPSPos[0], lastGPSPos[1], latitude, longitude) * 1000;
+        // Ignore movement within GPS noise floor (2× accuracy radius)
+        const noiseFloor = Math.max((acc || 10) * 2, 4);
+        if (movedMeters > noiseFloor) {
+          newSpeed = (movedMeters / 1000 / dt) * 3600;
+        }
       }
       dbg('pos  acc=±' + Math.round(acc) + 'm  spd(calc)=' + newSpeed.toFixed(1) + 'km/h  hdg=' + (hdg != null ? Math.round(hdg) : 'null'));
     } else {

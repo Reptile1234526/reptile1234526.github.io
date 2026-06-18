@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Speedometer & GPS</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -188,25 +190,41 @@
 
     .map-container {
       width: 100%;
-      height: 220px;
+      height: 260px;
       border: 1px solid rgba(0,245,255,0.15);
       border-radius: 10px;
       overflow: hidden;
       position: relative;
-      background: #000810;
     }
 
-    #map-canvas {
+    #leaflet-map {
       width: 100%;
       height: 100%;
     }
+
+    /* Override Leaflet UI to match dark theme */
+    .leaflet-control-zoom a {
+      background: rgba(0,10,20,0.85) !important;
+      color: #00f5ff !important;
+      border-color: rgba(0,245,255,0.2) !important;
+    }
+    .leaflet-control-zoom a:hover {
+      background: rgba(0,245,255,0.15) !important;
+    }
+    .leaflet-control-attribution {
+      background: rgba(0,0,0,0.5) !important;
+      color: rgba(255,255,255,0.3) !important;
+      font-size: 8px !important;
+    }
+    .leaflet-control-attribution a { color: rgba(255,255,255,0.3) !important; }
 
     .map-overlay {
       position: absolute;
       inset: 0;
       pointer-events: none;
       border-radius: 10px;
-      box-shadow: inset 0 0 40px rgba(0,0,0,0.6);
+      box-shadow: inset 0 0 30px rgba(0,0,0,0.5);
+      z-index: 500;
     }
 
     .map-coords {
@@ -214,8 +232,11 @@
       bottom: 10px;
       left: 12px;
       font-size: 10px;
-      color: rgba(0,245,255,0.5);
+      color: rgba(0,245,255,0.6);
       letter-spacing: 1px;
+      z-index: 1000;
+      text-shadow: 0 0 6px #000;
+      pointer-events: none;
     }
 
     .map-accuracy {
@@ -223,7 +244,10 @@
       bottom: 10px;
       right: 12px;
       font-size: 10px;
-      color: rgba(0,245,255,0.35);
+      color: rgba(0,245,255,0.4);
+      z-index: 1000;
+      text-shadow: 0 0 6px #000;
+      pointer-events: none;
     }
 
     /* Heading compass */
@@ -617,9 +641,9 @@
   <div class="map-section">
     <div class="section-label">GPS Track</div>
     <div class="map-container">
-      <canvas id="map-canvas"></canvas>
+      <div id="leaflet-map"></div>
       <div class="map-overlay"></div>
-      <div class="map-coords" id="coords-display">--°N &nbsp;--°E</div>
+      <div class="map-coords" id="coords-display">--° --°</div>
       <div class="map-accuracy" id="accuracy-display">±-- m</div>
     </div>
   </div>
@@ -725,10 +749,52 @@
   // ── Canvas refs ────────────────────────────────────────────────────────
   const speedoCanvas = document.getElementById('speedo-canvas');
   const sc = speedoCanvas.getContext('2d');
-  const mapCanvas = document.getElementById('map-canvas');
-  const mc = mapCanvas.getContext('2d');
   const compassCanvas = document.getElementById('compass-canvas');
   const cc = compassCanvas.getContext('2d');
+
+  // ── Leaflet map ────────────────────────────────────────────────────────
+  let lmap = null, lmarker = null, lAccCircle = null;
+  let lTrackLine = null, lTripLine = null;
+
+  function initMap(la, lo) {
+    if (lmap || typeof L === 'undefined') return;
+    lmap = L.map('leaflet-map', { zoomControl: true, attributionControl: true })
+             .setView([la, lo], 16);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '© OpenStreetMap © CARTO',
+      subdomains: 'abcd',
+      maxZoom: 20
+    }).addTo(lmap);
+
+    // Custom cyan dot marker
+    const icon = L.divIcon({
+      className: '',
+      html: '<div style="width:14px;height:14px;border-radius:50%;background:#00f5ff;box-shadow:0 0 10px #00f5ff,0 0 20px rgba(0,245,255,0.4);border:2px solid #fff;"></div>',
+      iconSize: [14, 14],
+      iconAnchor: [7, 7]
+    });
+    lmarker = L.marker([la, lo], { icon, zIndexOffset: 1000 }).addTo(lmap);
+    lAccCircle = L.circle([la, lo], {
+      radius: 10, color: '#00f5ff', fillColor: '#00f5ff',
+      fillOpacity: 0.08, weight: 1, opacity: 0.3
+    }).addTo(lmap);
+
+    lTrackLine = L.polyline([], { color: 'rgba(0,245,255,0.35)', weight: 3, lineJoin: 'round' }).addTo(lmap);
+    lTripLine  = L.polyline([], { color: '#00f5ff', weight: 3, lineJoin: 'round' }).addTo(lmap);
+  }
+
+  function updateMap(la, lo, acc) {
+    if (!lmap) { initMap(la, lo); return; }
+    const ll = [la, lo];
+    lmarker.setLatLng(ll);
+    lAccCircle.setLatLng(ll);
+    if (acc) lAccCircle.setRadius(acc);
+    lTrackLine.addLatLng(ll);
+    if (tripActive) lTripLine.addLatLng(ll);
+    // Keep map centered on position
+    lmap.panTo(ll, { animate: true, duration: 0.5 });
+  }
 
   // ── Trip control ──────────────────────────────────────────────────────
   function toggleTrip() {
@@ -751,6 +817,7 @@
     speedCount = 0;
     avgSpeed = 0;
     tripTrack = [];
+    if (lTripLine) lTripLine.setLatLngs([]);
     historyData = Array(32).fill(0);
     buildHistoryBars();
     document.getElementById('trip-summary').style.display = 'none';
@@ -776,17 +843,9 @@
   }
 
   // ── Init ───────────────────────────────────────────────────────────────
-  resizeMap();
-  window.addEventListener('resize', resizeMap);
   buildHistoryBars();
   renderAll();
   startDemo();        // always start demo immediately
-
-  function resizeMap() {
-    const container = mapCanvas.parentElement;
-    mapCanvas.width = container.clientWidth;
-    mapCanvas.height = container.clientHeight;
-  }
 
   function buildHistoryBars() {
     const wrap = document.getElementById('history-bars');
@@ -892,7 +951,7 @@
     altitude = alt;
     accuracy = acc;
 
-    pushMapPoint(latitude, longitude);
+    pushMapPoint(latitude, longitude, acc);
     if (tripActive) recordTripPoint(newSpeed, latitude, longitude);
 
     lat = latitude; lng = longitude;
@@ -1014,7 +1073,7 @@
     lat     = demoLat;
     lng     = demoLng;
 
-    pushMapPoint(demoLat, demoLng);
+    pushMapPoint(demoLat, demoLng, 5);
     if (tripActive) recordTripPoint(demoSpeed, demoLat, demoLng);
 
     document.getElementById('coords-display').textContent =
@@ -1022,9 +1081,10 @@
   }
 
   // ── Track helpers ──────────────────────────────────────────────────────
-  function pushMapPoint(la, lo) {
+  function pushMapPoint(la, lo, acc) {
     mapTrack.push([la, lo]);
     if (mapTrack.length > 500) mapTrack.shift();
+    updateMap(la, lo, acc);
   }
 
   function recordTripPoint(spd, la, lo) {
@@ -1055,7 +1115,6 @@
     }
     updateDOM();
     drawSpeedo();
-    drawMap();
     drawCompass();
     updateHistoryBars();
     requestAnimationFrame(renderAll);
@@ -1196,116 +1255,6 @@
     sc.strokeStyle = 'rgba(0,245,255,0.8)';
     sc.lineWidth = 1.5;
     sc.stroke();
-  }
-
-  // ── Map canvas ─────────────────────────────────────────────────────────
-  function drawMap() {
-    const W = mapCanvas.width, H = mapCanvas.height;
-    mc.clearRect(0, 0, W, H);
-
-    // Background
-    mc.fillStyle = '#000810';
-    mc.fillRect(0, 0, W, H);
-
-    // Grid
-    mc.strokeStyle = 'rgba(0,245,255,0.04)';
-    mc.lineWidth = 1;
-    for (let x = 0; x < W; x += 30) {
-      mc.beginPath(); mc.moveTo(x, 0); mc.lineTo(x, H); mc.stroke();
-    }
-    for (let y = 0; y < H; y += 30) {
-      mc.beginPath(); mc.moveTo(0, y); mc.lineTo(W, y); mc.stroke();
-    }
-
-    if (lat === null) {
-      mc.fillStyle = 'rgba(0,245,255,0.2)';
-      mc.font = '11px Courier New';
-      mc.textAlign = 'center';
-      mc.textBaseline = 'middle';
-      mc.fillText('AWAITING GPS SIGNAL', W / 2, H / 2);
-      return;
-    }
-
-    // Use mapTrack for display; fall back to just current position
-    const pts = mapTrack.length > 1 ? mapTrack : [[lat, lng]];
-
-    // Find bounding box
-    let minLat = Infinity, maxLat = -Infinity, minLng = Infinity, maxLng = -Infinity;
-    pts.forEach(([la, lo]) => {
-      if (la < minLat) minLat = la; if (la > maxLat) maxLat = la;
-      if (lo < minLng) minLng = lo; if (lo > maxLng) maxLng = lo;
-    });
-    // Also include current position
-    if (lat < minLat) minLat = lat; if (lat > maxLat) maxLat = lat;
-    if (lng < minLng) minLng = lng; if (lng > maxLng) maxLng = lng;
-
-    const pad = 30;
-    const spanLat = maxLat - minLat || 0.002;
-    const spanLng = maxLng - minLng || 0.002;
-    const scaleX = (W - pad * 2) / spanLng;
-    const scaleY = (H - pad * 2) / spanLat;
-    const scale  = Math.min(scaleX, scaleY);
-
-    function toCanvas([la, lo]) {
-      return [
-        pad + (lo - minLng) * scale + (W - pad * 2 - spanLng * scale) / 2,
-        H - pad - (la - minLat) * scale - (H - pad * 2 - spanLat * scale) / 2
-      ];
-    }
-
-    // Track line
-    if (pts.length > 1) {
-      mc.beginPath();
-      pts.forEach(([la, lo], i) => {
-        const [x, y] = toCanvas([la, lo]);
-        i === 0 ? mc.moveTo(x, y) : mc.lineTo(x, y);
-      });
-      mc.strokeStyle = 'rgba(0,245,255,0.22)';
-      mc.lineWidth = 2;
-      mc.lineJoin = 'round';
-      mc.stroke();
-
-      // Recent portion brighter
-      const recent = pts.slice(-25);
-      mc.beginPath();
-      recent.forEach(([la, lo], i) => {
-        const [x, y] = toCanvas([la, lo]);
-        i === 0 ? mc.moveTo(x, y) : mc.lineTo(x, y);
-      });
-      mc.strokeStyle = 'rgba(0,245,255,0.65)';
-      mc.lineWidth = 2.5;
-      mc.stroke();
-    }
-
-    // Current position dot
-    const [cx2, cy2] = toCanvas([lat, lng]);
-    const dotGrad = mc.createRadialGradient(cx2, cy2, 0, cx2, cy2, 14);
-    dotGrad.addColorStop(0, 'rgba(0,245,255,0.3)');
-    dotGrad.addColorStop(1, 'transparent');
-    mc.beginPath();
-    mc.arc(cx2, cy2, 14, 0, Math.PI * 2);
-    mc.fillStyle = dotGrad;
-    mc.fill();
-
-    mc.beginPath();
-    mc.arc(cx2, cy2, 5, 0, Math.PI * 2);
-    mc.fillStyle = '#00f5ff';
-    mc.shadowBlur = 10;
-    mc.shadowColor = '#00f5ff';
-    mc.fill();
-    mc.shadowBlur = 0;
-
-    // Heading arrow
-    if (heading !== null) {
-      const rad = (heading - 90) * Math.PI / 180;
-      const aLen = 18;
-      mc.beginPath();
-      mc.moveTo(cx2, cy2);
-      mc.lineTo(cx2 + Math.cos(rad) * aLen, cy2 + Math.sin(rad) * aLen);
-      mc.strokeStyle = 'rgba(0,245,255,0.8)';
-      mc.lineWidth = 2;
-      mc.stroke();
-    }
   }
 
   // ── Compass canvas ─────────────────────────────────────────────────────

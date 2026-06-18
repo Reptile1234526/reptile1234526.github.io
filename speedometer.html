@@ -929,10 +929,16 @@
     lastGPSPos  = [latitude, longitude];
     lastGPSTime = now;
 
-    // First real fix — kill demo
+    // First real fix — kill demo and wipe its fake track
     if (usingDemo) {
       usingDemo = false;
       if (demoInterval) { clearInterval(demoInterval); demoInterval = null; }
+      // Clear demo track so no line is drawn to SF
+      mapTrack = [];
+      if (lTrackLine) lTrackLine.setLatLngs([]);
+      if (lTripLine)  lTripLine.setLatLngs([]);
+      // Recreate map centered on real position
+      if (lmap) { lmap.remove(); lmap = null; lmarker = null; lAccCircle = null; lTrackLine = null; lTripLine = null; }
       document.getElementById('gps-status-text').textContent = 'GPS';
       dbg('switched to live GPS', '#00ff88');
     }

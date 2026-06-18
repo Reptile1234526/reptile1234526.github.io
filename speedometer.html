@@ -626,11 +626,11 @@
 
   <!-- Compass + Altitude -->
   <div class="compass-row">
-    <div class="compass-card">
+    <div class="compass-card" id="compass-card" onclick="activateCompass()" style="cursor:pointer;">
       <canvas class="compass-ring" id="compass-canvas" width="52" height="52"></canvas>
       <div class="compass-info">
         <div class="compass-direction" id="heading-dir">--</div>
-        <div class="compass-deg" id="heading-deg">--- °</div>
+        <div class="compass-deg" id="heading-deg">Tap to enable</div>
       </div>
     </div>
     <div class="altitude-card">
@@ -705,6 +705,7 @@
   let speed = 0, displaySpeed = 0;
   let maxSpeed = 0, avgSpeed = 0, distance = 0;
   let heading = 0, displayHeading = 0;
+  let compassActive = false;
   let altitude = null, accuracy = null;
   let lat = null, lng = null;
   let tripStart = null, tripEnd = null, elapsed = 0;
@@ -929,6 +930,57 @@
     document.getElementById('gps-banner-btn').textContent = 'Retry';
   }
 
+  // ── Compass (DeviceOrientationEvent) ──────────────────────────────────
+  function activateCompass() {
+    if (compassActive) return;
+    const card = document.getElementById('compass-card');
+
+    function startListening() {
+      compassActive = true;
+      card.style.cursor = 'default';
+      card.onclick = null;
+      window.addEventListener('deviceorientation', onOrientation, true);
+      dbg('compass: deviceorientation listener added', '#00ff88');
+    }
+
+    if (typeof DeviceOrientationEvent !== 'undefined' &&
+        typeof DeviceOrientationEvent.requestPermission === 'function') {
+      // iOS 13+ — must call from a user gesture
+      DeviceOrientationEvent.requestPermission()
+        .then(state => {
+          if (state === 'granted') {
+            startListening();
+          } else {
+            document.getElementById('heading-deg').textContent = 'Permission denied';
+            dbg('compass permission denied', '#ff3366');
+          }
+        })
+        .catch(e => {
+          document.getElementById('heading-deg').textContent = 'Error: ' + e.message;
+          dbg('compass error: ' + e.message, '#ff3366');
+        });
+    } else {
+      // Android / non-iOS — no permission needed
+      startListening();
+    }
+  }
+  window.activateCompass = activateCompass;
+
+  function onOrientation(e) {
+    let h = null;
+    if (e.webkitCompassHeading != null) {
+      // iOS Safari — webkitCompassHeading is degrees clockwise from magnetic north
+      h = e.webkitCompassHeading;
+    } else if (e.alpha != null) {
+      // Android Chrome — alpha is degrees counter-clockwise from north
+      h = (360 - e.alpha) % 360;
+    }
+    if (h == null) return;
+    heading = h;
+    document.getElementById('heading-dir').textContent = headingToDir(h);
+    document.getElementById('heading-deg').textContent = Math.round(h) + ' °';
+  }
+
   function startDemo() {
     if (demoInterval) return;
     usingDemo = true;
@@ -1022,8 +1074,10 @@
     document.getElementById('avg-val').textContent = Math.round(avgSpeed);
     document.getElementById('dist-val').textContent = distance.toFixed(1);
     document.getElementById('time-val').textContent = formatTime(elapsed);
-    document.getElementById('heading-dir').textContent = headingToDir(heading);
-    document.getElementById('heading-deg').textContent = Math.round(heading) + ' °';
+    if (!compassActive) {
+      document.getElementById('heading-dir').textContent = headingToDir(heading);
+      document.getElementById('heading-deg').textContent = usingDemo ? Math.round(heading) + ' °' : 'Tap to enable';
+    }
     if (tripStart !== null) {
       const d = new Date(tripStart);
       document.getElementById('trip-start').textContent =
